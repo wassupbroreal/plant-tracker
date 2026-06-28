@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "plant",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "identifier": "com.plant.app",
   "build": {
     "frontendDist": "../dist",
@@ -52,9 +52,9 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "YOUR_TAURI_PUBLIC_KEY_PLACEHOLDER",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENCM0NFRjVBRDhCNUY1MgpSV1JTWDR1dDljNnpESlgzbUhxL0FpWlVZbnMwa1dHZDllQ2ZZYVpKZmxaRGs5TVhaSFRpTEhVRAo=",
       "endpoints": [
-        "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/releases/latest/download/latest.json"
+        "https://github.com/wassupbroreal/plant-tracker/releases/latest/download/latest.json"
       ]
     }
   }
