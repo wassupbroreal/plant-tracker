@@ -1,0 +1,45 @@
+name: 'publish'
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger build on version tags like v0.4.2
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write # Required for creating release and uploading assets
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest] # Build primarily for Windows (NSIS installer)
+
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+          
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+          
+      - name: Install frontend dependencies
+        run: npm install
+        
+      - name: Build and Publish Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__ # Automatically replaced by tauri-action from Cargo.toml or tauri.conf.json version
+          releaseName: 'PLANT v__VERSION__'
+          releaseBody: 'Новое обновление PLANT. См. приложенные файлы для установки и автообновления.'
+          releaseDraft: false
+          prerelease: false
