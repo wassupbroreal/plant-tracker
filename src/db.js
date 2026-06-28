@@ -71,7 +71,7 @@ export const db = {
       const profile = this.getProfiles().find(p => p.id === profileId);
       const username = profile ? (profile.login || profile.name) : 'Пользователь';
       const pin = profile ? (profile.password || profile.pin) : '';
-      const user = { username, currency: 'RUB', passcode: pin, avatar: '' };
+      const user = { username, currency: 'RUB', passcode: pin, avatar: '', theme: 'lime' };
       localStorage.setItem(userKey, JSON.stringify(user));
     }
   },
@@ -169,12 +169,13 @@ export const db = {
     return data ? JSON.parse(data) : null;
   },
 
-  setUser(username, currency, passcode, avatar) {
+  setUser(username, currency, passcode, avatar, theme) {
     const existing = this.getProfile();
     const finalCurrency = currency || (existing ? existing.currency : 'RUB');
     const finalPasscode = passcode !== undefined ? passcode : (existing ? existing.passcode : '');
     const finalAvatar = avatar !== undefined ? avatar : (existing ? existing.avatar : '');
-    const user = { username, currency: finalCurrency, passcode: finalPasscode, avatar: finalAvatar };
+    const finalTheme = theme !== undefined ? theme : (existing ? (existing.theme || 'lime') : 'lime');
+    const user = { username, currency: finalCurrency, passcode: finalPasscode, avatar: finalAvatar, theme: finalTheme };
     localStorage.setItem(this.getKey('USER'), JSON.stringify(user));
     localStorage.setItem('plant_session_active', 'true');
 

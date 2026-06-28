@@ -17,7 +17,7 @@
       <!-- Кастомный Titlebar -->
       <div data-tauri-drag-region class="app-titlebar">
         <div class="titlebar-logo" data-tauri-drag-region>
-          <span class="material-symbols-outlined">eco</span>
+          <span class="material-symbols-outlined">potted_plant</span>
           <span>Plant</span>
         </div>
         <div class="titlebar-drag-spacer" data-tauri-drag-region></div>
@@ -66,17 +66,18 @@
       <!-- Инициализирующий загрузчик -->
       <div id="app-loader" class="loader-container">
         <div class="loader-content">
-          <span class="material-symbols-outlined loader-icon">eco</span>
+          <span class="material-symbols-outlined loader-icon">potted_plant</span>
           <div class="loader-text">Загрузка Plant...</div>
         </div>
       </div>
 
       <!-- ЭКРАН АВТОРИЗАЦИИ (ВХОДА) -->
-      <div id="auth-screen" class="screen">
-        <div class="auth-container" id="auth-container">
+      <div id="auth-screen" class="screen" style="position: relative; overflow: hidden; width: 100vw; height: 100vh;">
+        <div class="header-bg-shapes auth-rain"></div>
+        <div class="auth-container" id="auth-container" style="position: relative; z-index: 10;">
           <!-- Статический заголовок Plant над карточкой входа -->
           <div class="auth-brand-header">
-            <span class="material-symbols-outlined logo-icon">eco</span>
+            <span class="material-symbols-outlined logo-icon">potted_plant</span>
             <span class="logo-text">Plant</span>
           </div>
 
@@ -95,7 +96,7 @@
                 <div class="login-inputs" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
                   <div class="input-group">
                     <label for="login-username">Логин</label>
-                    <input type="text" id="login-username" required placeholder="Введите логин..." autocomplete="username" spellcheck="false">
+                    <input type="text" id="login-username" required placeholder="Введите логин..." autocomplete="off" spellcheck="false">
                   </div>
                   <div class="input-group">
                     <label for="login-password">Пароль</label>
@@ -120,7 +121,7 @@
                 <div class="register-inputs" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
                   <div class="input-group">
                     <label for="register-username">Логин</label>
-                    <input type="text" id="register-username" required placeholder="Придумайте логин..." autocomplete="username" spellcheck="false">
+                    <input type="text" id="register-username" required placeholder="Придумайте логин..." autocomplete="off" spellcheck="false">
                   </div>
                   <div class="input-group">
                     <label for="register-password">Пароль</label>
@@ -207,13 +208,18 @@
           <!-- Вкладки контента будут реализованы на следующих этапах -->
           <section id="tab-overview" class="tab-content active">
             <div class="content-header">
-              <h1>Обзор</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">public</span>
+                <h1>Обзор</h1>
+              </div>
               <p class="content-description">Сводка доходов, расходов, накоплений и лимитов бюджетов</p>
             </div>
 
             <!-- Карточки сводки -->
             <div class="overview-cards-grid">
               <div class="overview-card summary-card-balance">
+                <img src="img/budget.png" class="card-decor-img" alt="">
                 <div class="card-meta">
                   <span class="material-symbols-outlined">account_balance</span>
                   <span class="card-label">Текущий баланс</span>
@@ -221,6 +227,7 @@
                 <h2 id="overview-balance">0.00 ₽</h2>
               </div>
               <div class="overview-card summary-card-income">
+                <img src="img/budget.png" class="card-decor-img" alt="">
                 <div class="card-meta">
                   <span class="material-symbols-outlined">trending_up</span>
                   <span class="card-label">Доходы за месяц</span>
@@ -228,6 +235,7 @@
                 <h2 id="overview-income" class="text-success">+0.00 ₽</h2>
               </div>
               <div class="overview-card summary-card-expense">
+                <img src="img/budget.png" class="card-decor-img" alt="">
                 <div class="card-meta">
                   <span class="material-symbols-outlined">trending_down</span>
                   <span class="card-label">Расходы за месяц</span>
@@ -235,6 +243,7 @@
                 <h2 id="overview-expense" class="text-danger">-0.00 ₽</h2>
               </div>
               <div class="overview-card summary-card-savings">
+                <img src="img/budget.png" class="card-decor-img" alt="">
                 <div class="card-meta">
                   <span class="material-symbols-outlined">savings</span>
                   <span class="card-label">Накопления всего</span>
@@ -246,12 +255,9 @@
             <!-- Новая трехколоночная сетка -->
             <div class="overview-columns-grid">
               <!-- Столбец 1: Бюджеты -->
-              <div class="dashboard-card overview-column">
-                <div class="card-header">
-                  <h3>Бюджеты</h3>
-                  <button class="btn-quick-nav" id="overview-btn-to-budgets">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
+              <div class="overview-column">
+                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Бюджеты</span>
                 </div>
                 <div class="column-content" id="overview-budgets-list">
                   <!-- Карточки бюджетов на текущий месяц (макс 3-4 шт.) -->
@@ -259,12 +265,9 @@
               </div>
 
               <!-- Столбец 2: Цели накопления -->
-              <div class="dashboard-card overview-column">
-                <div class="card-header">
-                  <h3>Цели</h3>
-                  <button class="btn-quick-nav" id="overview-btn-to-goals">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
+              <div class="overview-column">
+                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Цели</span>
                 </div>
                 <div class="column-content" id="overview-goals-list">
                   <!-- Карточки целей накопления (макс 3-4 шт.) -->
@@ -272,12 +275,9 @@
               </div>
 
               <!-- Столбец 3: Задачи -->
-              <div class="dashboard-card overview-column">
-                <div class="card-header">
-                  <h3>Задачи</h3>
-                  <button class="btn-quick-nav" id="overview-btn-to-tasks">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
+              <div class="overview-column">
+                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Задачи</span>
                 </div>
                 <div class="column-content" id="overview-tasks-list">
                   <!-- Задачи рендерятся динамически -->
@@ -285,12 +285,9 @@
               </div>
 
               <!-- Столбец 4: Планирование -->
-              <div class="dashboard-card overview-column">
-                <div class="card-header">
-                  <h3>Планирование</h3>
-                  <button class="btn-quick-nav" id="overview-btn-to-planning">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
+              <div class="overview-column">
+                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Планирование</span>
                 </div>
                 <div class="column-content" id="overview-planning-list">
                   <!-- Запланированные платежи рендерятся динамически -->
@@ -301,7 +298,11 @@
           <!-- Вкладка: ТРАНЗАКЦИИ (Transactions) -->
           <section id="tab-transactions" class="tab-content">
             <div class="content-header">
-              <h1>Транзакции</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">payments</span>
+                <h1>Транзакции</h1>
+              </div>
               <p class="content-description">Список всех финансовых операций с возможностью поиска и фильтрации</p>
             </div>
 
@@ -403,7 +404,11 @@
           <!-- Вкладка: КАТЕГОРИИ (Categories) -->
           <section id="tab-categories" class="tab-content">
             <div class="content-header">
-              <h1>Категории</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">sell</span>
+                <h1>Категории</h1>
+              </div>
               <p class="content-description">Управление категориями доходов, расходов и накоплений</p>
             </div>
 
@@ -428,7 +433,8 @@
                   <div class="input-group">
                     <label>Цвет</label>
                     <div class="color-picker-grid">
-                      <button type="button" class="color-swatch active" style="background-color: #84cc16;" data-color="#84cc16"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch active" style="background-color: #ffffff;" data-color="#ffffff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #84cc16;" data-color="#84cc16"><span class="material-symbols-outlined">check</span></button>
                       <button type="button" class="color-swatch" style="background-color: #06b6d4;" data-color="#06b6d4"><span class="material-symbols-outlined">check</span></button>
                       <button type="button" class="color-swatch" style="background-color: #3b82f6;" data-color="#3b82f6"><span class="material-symbols-outlined">check</span></button>
                       <button type="button" class="color-swatch" style="background-color: #8b5cf6;" data-color="#8b5cf6"><span class="material-symbols-outlined">check</span></button>
@@ -436,8 +442,15 @@
                       <button type="button" class="color-swatch" style="background-color: #ef4444;" data-color="#ef4444"><span class="material-symbols-outlined">check</span></button>
                       <button type="button" class="color-swatch" style="background-color: #f59e0b;" data-color="#f59e0b"><span class="material-symbols-outlined">check</span></button>
                       <button type="button" class="color-swatch" style="background-color: #14b8a6;" data-color="#14b8a6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #91ffc6;" data-color="#91ffc6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #919cff;" data-color="#919cff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #91e4ff;" data-color="#91e4ff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #b491ff;" data-color="#b491ff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ff91fd;" data-color="#ff91fd"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ff9191;" data-color="#ff9191"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ceff91;" data-color="#ceff91"><span class="material-symbols-outlined">check</span></button>
                     </div>
-                    <input type="hidden" id="selected-category-color" value="#84cc16">
+                    <input type="hidden" id="selected-category-color" value="#ffffff">
                   </div>
                   <div class="input-group">
                     <label>Иконка</label>
@@ -472,8 +485,8 @@
                   
                   <!-- Колонка: Доходы -->
                   <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: center; border-radius: 4px; display: flex; align-items: center; justify-content: center; height: 38px;">
-                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">Доходы</span>
+                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: left; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Доходы</span>
                     </div>
                     <div class="category-chips-grid" id="categories-income-list" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                       <!-- Заполняется динамически -->
@@ -482,8 +495,8 @@
 
                   <!-- Колонка: Расходы -->
                   <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: center; border-radius: 4px; display: flex; align-items: center; justify-content: center; height: 38px;">
-                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">Расходы</span>
+                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: left; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Расходы</span>
                     </div>
                     <div class="category-chips-grid" id="categories-expense-list" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                       <!-- Заполняется динамически -->
@@ -492,8 +505,8 @@
 
                   <!-- Колонка: Накопления -->
                   <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: center; border-radius: 4px; display: flex; align-items: center; justify-content: center; height: 38px;">
-                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">Накопления</span>
+                    <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: left; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Накопления</span>
                     </div>
                     <div class="category-chips-grid" id="categories-savings-list" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                       <!-- Заполняется динамически -->
@@ -508,7 +521,11 @@
           <!-- Вкладка: БЮДЖЕТЫ (Budgets) -->
           <section id="tab-budgets" class="tab-content">
             <div class="content-header">
-              <h1>Бюджеты</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">account_balance_wallet</span>
+                <h1>Бюджеты</h1>
+              </div>
               <p class="content-description">Месячные лимиты расходов по различным категориям</p>
             </div>
 
@@ -558,7 +575,11 @@
           <!-- Вкладка: ЦЕЛИ НАКОПЛЕНИЯ (Savings Goals) -->
           <section id="tab-savings-goals" class="tab-content">
             <div class="content-header">
-              <h1>Цели накопления</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">track_changes</span>
+                <h1>Цели накопления</h1>
+              </div>
               <p class="content-description">Ставьте финансовые цели и отслеживайте прогресс сбережений</p>
             </div>
 
@@ -614,7 +635,11 @@
           <!-- Вкладка: ПЛАНИРОВАНИЕ (Planning) -->
           <section id="tab-planning" class="tab-content">
             <div class="content-header">
-              <h1>Планирование</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">event_upcoming</span>
+                <h1>Планирование</h1>
+              </div>
               <p class="content-description">График запланированных регулярных платежей и подписок</p>
             </div>
 
@@ -682,7 +707,11 @@
           <!-- Вкладка: ЗАМЕТКИ (Notes) -->
           <section id="tab-notes" class="tab-content">
             <div class="content-header">
-              <h1>Заметки</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">description</span>
+                <h1>Заметки</h1>
+              </div>
               <p class="content-description">Важные мысли, финансовые заметки и идеи</p>
             </div>
             
@@ -742,7 +771,11 @@
           <!-- Вкладка: ЧЕК-ЛИСТЫ (Checklists) -->
           <section id="tab-checklists" class="tab-content">
             <div class="content-header">
-              <h1>Чек-листы</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">fact_check</span>
+                <h1>Чек-листы</h1>
+              </div>
               <p class="content-description">Списки покупок, дел и финансовых планов</p>
             </div>
             
@@ -807,7 +840,11 @@
           <!-- Вкладка: ЗАДАЧИ (Tasks) -->
           <section id="tab-tasks" class="tab-content">
             <div class="content-header">
-              <h1>Задачи</h1>
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">assignment</span>
+                <h1>Задачи</h1>
+              </div>
               <p class="content-description">Управление задачами и процессами на Kanban-доске</p>
             </div>
             
@@ -831,8 +868,8 @@
                 
                 <!-- Колонка: Не начато -->
                 <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; height: 38px;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">Не начато</span>
+                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Не начато</span>
                   </div>
                   <div class="category-chips-grid" id="list-todo" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                     <!-- Задачи todo заполняются динамически -->
@@ -841,8 +878,8 @@
 
                 <!-- Колонка: В процессе -->
                 <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; height: 38px;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">В процессе</span>
+                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">В процессе</span>
                   </div>
                   <div class="category-chips-grid" id="list-in-progress" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                     <!-- Задачи in_progress заполняются динамически -->
@@ -851,8 +888,8 @@
 
                 <!-- Колонка: Выполнено -->
                 <div style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
-                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; height: 38px;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">Выполнено</span>
+                  <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Выполнено</span>
                   </div>
                   <div class="category-chips-grid" id="list-done" style="display: flex; flex-direction: column; gap: var(--spacing-layout);">
                     <!-- Задачи done заполняются динамически -->
@@ -868,14 +905,19 @@
 
       <!-- ЭКРАН "О ПРИЛОЖЕНИИ" -->
       <div id="about-screen" class="screen">
-        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: 20px 16px; overflow-y: auto;">
-          <div class="content-header" style="max-width: 800px; margin: 0 auto 20px auto; width: 100%;">
-            <h1>О приложении</h1>
+        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: var(--spacing-layout); overflow-y: auto; gap: var(--spacing-layout);">
+          <div class="content-header" style="margin-bottom: 0;">
+            <div class="header-bg-shapes">
+            </div>
+            <div class="header-title-row">
+              <span class="material-symbols-outlined header-icon">info</span>
+              <h1>О приложении</h1>
+            </div>
             <p class="content-description">Plant — приватный и минималистичный персональный органайзер</p>
           </div>
-          <div class="dashboard-card" style="max-width: 800px; margin: 0 auto; width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-            <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-              <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent-lime);">eco</span>
+          <div class="dashboard-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent-color);">potted_plant</span>
               <span style="font-size: 20px; font-weight: 700; letter-spacing: 1px;">Plant</span>
             </div>
             
@@ -886,7 +928,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px;">
               <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary);">
-                  <span class="material-symbols-outlined" style="color: var(--accent-lime); font-size: 20px;">payments</span>
+                  <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 20px;">payments</span>
                   <span>Финансовый блок</span>
                 </div>
                 <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
@@ -930,33 +972,58 @@
 
       <!-- ЭКРАН "ОБНОВЛЕНИЕ" -->
       <div id="updates-screen" class="screen">
-        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: 20px 16px; overflow-y: auto;">
-          <div class="content-header" style="max-width: 800px; margin: 0 auto 20px auto; width: 100%;">
-            <h1>Обновления</h1>
+        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: var(--spacing-layout); overflow-y: auto; gap: var(--spacing-layout);">
+          <div class="content-header" style="margin-bottom: 0;">
+            <div class="header-bg-shapes">
+            </div>
+            <div class="header-title-row">
+              <span class="material-symbols-outlined header-icon">system_update_alt</span>
+              <h1>Обновления</h1>
+            </div>
             <p class="content-description">История версий и ключевые изменения в приложении PLANT</p>
           </div>
-          <div class="dashboard-card" style="max-width: 800px; margin: 0 auto; width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 24px;">
-            
+
+          <!-- Карточка Текущего Обновления (v0.5.0) -->
+          <div class="dashboard-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px; font-weight: 700; color: var(--text-primary);">Версия 0.5.0 — Модульная архитектура и кастомизация</span>
+                <span class="tx-type-badge income" style="font-size: 11px; padding: 2px 6px;">Текущая версия</span>
+              </div>
+              <span style="font-size: 11px; color: var(--text-muted);">Июнь 2026</span>
+            </div>
+            <ul style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+              <li>Выполнен масштабный рефакторинг: единый файл логики ui.js разделен на независимые модули по функционалу.</li>
+              <li>Оптимизирована скорость работы приложения и отклик элементов интерфейса.</li>
+              <li>Внедрена система кастомизации с возможностью выбора акцентного цвета темы.</li>
+              <li>Улучшена структура базы данных для поддержки новых настроек персонализации.</li>
+            </ul>
+
             <!-- Блок автообновлений -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; margin-top: 8px;">
               <div style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span class="material-symbols-outlined" style="color: var(--accent-lime); font-size: 20px;">system_update_alt</span>
+                  <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 20px;">system_update_alt</span>
                   <span style="font-weight: 500; font-size: 14px;">Автоматические обновления</span>
                 </div>
-                <span style="font-size: 12px; color: var(--text-secondary);">Текущая версия: v0.4.4</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">Текущая версия: v0.5.0</span>
               </div>
               <button id="check-updates-btn" class="btn btn-primary btn-sm" style="height: 36px;">
                 <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span>
                 Проверить обновления
               </button>
             </div>
+          </div>
+
+          <!-- Карточка Истории Изменений -->
+          <div class="dashboard-card" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+            <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 24px;">История изменений</h3>
 
             <!-- Версия 0.4.4 -->
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                <span style="font-size: 16px; font-weight: 700; color: var(--accent-lime);">Версия 0.4.4 — Проверка автообновления</span>
-                <span style="font-size: 11px; color: var(--text-muted);">Текущее обновление</span>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Версия 0.4.4 — Проверка автообновления</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">Предыдущая</span>
               </div>
               <ul style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
                 <li>Успешно доставлено автоматическое обновление!</li>
@@ -965,10 +1032,10 @@
             </div>
 
             <!-- Версия 0.4.3 -->
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                <span style="font-size: 16px; font-weight: 700; color: var(--accent-lime);">Версия 0.4.3 — Тестирование автообновлений</span>
-                <span style="font-size: 11px; color: var(--text-secondary);">Предыдущее</span>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Версия 0.4.3 — Тестирование автообновлений</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">Предыдущая</span>
               </div>
               <ul style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
                 <li>Интегрированы ключи подписи автообновлений.</li>
@@ -977,10 +1044,10 @@
             </div>
 
             <!-- Версия 0.4.2 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                <span style="font-size: 16px; font-weight: 700; color: var(--accent-lime);">Версия 0.4.2 — Тонкая настройка и навигация</span>
-                <span style="font-size: 11px; color: var(--text-secondary);">Предыдущее</span>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Версия 0.4.2 — Тонкая настройка и навигация</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">Предыдущая</span>
               </div>
               <ul style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
                 <li>Добавлена трехвкладочная навигация прямо в Titlebar (Главная, О приложении, Обновление) с плавными fade-переходами.</li>
@@ -990,8 +1057,8 @@
             </div>
 
             <!-- Версия 0.4.1 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Версия 0.4.1 — Накопления и обновленный дашборд</span>
                 <span style="font-size: 11px; color: var(--text-muted);">Июнь 2026</span>
               </div>
@@ -1005,7 +1072,7 @@
 
             <!-- Версия 0.4 -->
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Версия 0.4.0 — Модуль Органайзера</span>
                 <span style="font-size: 11px; color: var(--text-muted);">Май 2026</span>
               </div>
@@ -1015,7 +1082,6 @@
                 <li>Подключен премиальный моноширинный шрифт JetBrains Mono.</li>
               </ul>
             </div>
-            
           </div>
         </div>
       </div>
@@ -1049,28 +1115,85 @@
                 <input type="password" id="profile-passcode" placeholder="Введите новый пароль, чтобы изменить" autocomplete="off">
               </div>
               <button type="submit" class="btn btn-primary btn-block">Сохранить изменения</button>
-              <button type="button" id="btn-delete-profile" class="btn btn-danger btn-block" style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>Удалить профиль со всеми данными</span>
-                <span class="material-symbols-outlined" style="font-size: 18px;">delete_forever</span>
-              </button>
             </form>
           </div>
         </div>
       </div>
 
-      <!-- ЭКРАН НАСТРОЕК -->
       <div id="settings-screen" class="screen">
-        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: 20px 16px; overflow-y: auto;">
-          <div class="content-header" style="max-width: 800px; margin: 0 auto 20px auto; width: 100%;">
-            <h1>Настройки</h1>
+        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: var(--spacing-layout); overflow-y: auto; gap: var(--spacing-layout);">
+          <div class="content-header" style="margin-bottom: 0;">
+            <div class="header-bg-shapes">
+            </div>
+            <div class="header-title-row">
+              <span class="material-symbols-outlined header-icon">settings</span>
+              <h1>Настройки</h1>
+            </div>
             <p class="content-description">Параметры интерфейса, выбор валюты и резервное копирование</p>
           </div>
           
-          <div class="settings-list-container" style="max-width: 800px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px;">
+          <div class="settings-list-container" style="width: 100%; display: flex; flex-direction: column; gap: var(--spacing-layout);">
+            <!-- Карточка Цветовой Темы -->
+            <div class="dashboard-card">
+              <h3 style="margin-bottom: 16px;">Цветовая тема</h3>
+              <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
+                Выберите основной акцентный цвет интерфейса приложения PLANT.
+              </p>
+              <div class="theme-picker-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="theme-swatch" data-theme="white" style="background-color: #ffffff;" title="Белый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="lime" style="background-color: #84cc16;" title="Лаймовый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="cyan" style="background-color: #06b6d4;" title="Голубой">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="blue" style="background-color: #3b82f6;" title="Синий">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="purple" style="background-color: #8b5cf6;" title="Фиолетовый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="pink" style="background-color: #ec4899;" title="Розовый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="red" style="background-color: #ef4444;" title="Красный">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="orange" style="background-color: #f59e0b;" title="Оранжевый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="teal" style="background-color: #14b8a6;" title="Бирюзовый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="mint" style="background-color: #91ffc6;" title="Мятный">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="lavender" style="background-color: #919cff;" title="Лавандовый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="sky" style="background-color: #91e4ff;" title="Небесный">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="lilac" style="background-color: #b491ff;" title="Сиреневый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="blossom" style="background-color: #ff91fd;" title="Цветочный">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="coral" style="background-color: #ff9191;" title="Коралловый">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="theme-swatch" data-theme="pastel-lime" style="background-color: #ceff91;" title="Светло-лимонный">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Карточка Валюты -->
             <div class="dashboard-card">
-              <h3>Валюта приложения</h3>
-              <div style="border-bottom: 1px solid var(--border-color); margin: 12px 0;"></div>
+              <h3 style="margin-bottom: 16px;">Валюта приложения</h3>
               <form id="settings-currency-form" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
                 <div class="input-group" style="margin-bottom: 0;">
                   <label for="settings-currency">Выберите валюту</label>
@@ -1084,7 +1207,7 @@
                     <option value="UAH">Uah (₴) — Гривна</option>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-secondary" style="align-self: flex-start;">
+                <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
                   <span>Применить валюту</span>
                 </button>
               </form>
@@ -1092,19 +1215,18 @@
 
             <!-- Карточка Резервного копирования -->
             <div class="dashboard-card">
-              <h3>Резервное копирование</h3>
-              <div style="border-bottom: 1px solid var(--border-color); margin: 12px 0;"></div>
+              <h3 style="margin-bottom: 16px;">Резервное копирование</h3>
               <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
                 Вы можете экспортировать все транзакции, категории, бюджеты и планы в один JSON-файл для бэкапа или переноса на другое устройство.
               </p>
               
               <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <button id="settings-export-btn" class="btn btn-secondary">
+                <button id="settings-export-btn" class="btn btn-primary">
                   <span>Экспорт в json</span>
                 </button>
                 
                 <div style="position: relative; overflow: hidden; display: inline-block;">
-                  <button class="btn btn-secondary" id="import-trigger-btn" type="button">
+                  <button class="btn btn-primary" id="import-trigger-btn" type="button">
                     <span>Импорт из json</span>
                   </button>
                   <input type="file" id="settings-import-file" accept=".json" style="position: absolute; left: 0; top: 0; opacity: 0; font-size: 100px; cursor: pointer; width: 100%; height: 100%;">
@@ -1114,14 +1236,21 @@
 
             <!-- Карточка Опасной зоны -->
             <div class="dashboard-card" style="border-color: var(--color-danger);">
-              <h3 style="color: var(--color-danger);">Опасная зона</h3>
-              <div style="border-bottom: 1px solid var(--border-color); margin: 12px 0;"></div>
+              <h3 style="color: var(--color-danger); margin-bottom: 16px;">Опасная зона</h3>
               <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
-                Сброс приложения приведет к безвозвратному удалению всех созданных транзакций, бюджетов, запланированных платежей и настроек пользователя. Данные в LocalStorage будут полностью очищены.
+                Сброс данных или удаление профиля приведет к безвозвратному удалению информации. Данные в LocalStorage будут полностью очищены.
               </p>
-              <button id="settings-reset-btn" class="btn btn-danger">
-                <span>Сбросить все данные</span>
-              </button>
+              
+              <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                <button id="settings-reset-btn" class="btn btn-danger">
+                  <span>Сбросить все данные</span>
+                </button>
+                
+                <button type="button" id="btn-delete-profile" class="btn btn-danger" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  <span>Удалить профиль со всеми данными</span>
+                  <span class="material-symbols-outlined" style="font-size: 18px;">delete_forever</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1133,7 +1262,7 @@
     <!-- Кастомный Footer -->
     <footer class="app-footer">
       <div class="footer-right" style="margin-left: auto;">
-        <span>v0.4.4</span>
+        <span>v0.5.0</span>
       </div>
     </footer>
   </div>
@@ -1153,9 +1282,9 @@
         </div>
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
           <p id="confirm-modal-message" style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; white-space: pre-wrap;"></p>
-          <div style="display: flex; gap: 12px; justify-content: flex-end;">
-            <button id="btn-confirm-cancel" class="btn btn-secondary" style="padding: 8px 16px;">Отмена</button>
-            <button id="btn-confirm-ok" class="btn btn-primary" style="padding: 8px 16px;">Подтвердить</button>
+          <div class="modal-footer" style="margin-top: 0;">
+            <button id="btn-confirm-cancel" class="btn btn-secondary">Отмена</button>
+            <button id="btn-confirm-ok" class="btn btn-primary">Подтвердить</button>
           </div>
         </div>
       </div>
@@ -1177,11 +1306,11 @@
           </div>
           <div class="input-group" style="margin-bottom: 0;">
             <label for="modal-task-desc">Описание</label>
-            <textarea id="modal-task-desc" placeholder="Опишите задачу..." style="resize: none; width: 100%; height: 80px; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 10px 12px; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none;"></textarea>
+            <textarea id="modal-task-desc" placeholder="Опишите задачу..." style="resize: none; height: 80px;"></textarea>
           </div>
-          <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 4px;">
-            <button type="button" id="btn-add-task-cancel" class="btn btn-secondary" style="padding: 8px 16px;">Отмена</button>
-            <button type="submit" id="btn-add-task-submit" class="btn btn-primary" style="padding: 8px 16px; background-color: #38bdf8; border-color: #38bdf8; color: #121212;">Добавить</button>
+          <div class="modal-footer">
+            <button type="button" id="btn-add-task-cancel" class="btn btn-secondary">Отмена</button>
+            <button type="submit" id="btn-add-task-submit" class="btn btn-primary">Добавить</button>
           </div>
         </form>
       </div>

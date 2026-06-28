@@ -125,7 +125,7 @@ button, input, select, textarea {
 
 .titlebar-logo span.material-symbols-outlined {
   font-size: 16px;
-  color: var(--accent-lime);
+  color: var(--accent-color);
 }
 
 .titlebar-drag-spacer {
@@ -194,7 +194,7 @@ button, input, select, textarea {
 
 .text-success { color: var(--color-success); }
 .text-danger { color: var(--color-danger); }
-.text-accent { color: var(--accent-lime); }
+.text-accent { color: var(--accent-color); }
 .text-right { text-align: right; }
 .text-center { text-align: center; }
 
@@ -208,9 +208,11 @@ button, input, select, textarea {
   border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform 0.1s ease;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform 0.1s ease;
   text-decoration: none;
   user-select: none;
+  background-color: #181818;
+  border: 1px solid var(--border-color);
 }
 
 .btn:active {
@@ -218,33 +220,27 @@ button, input, select, textarea {
 }
 
 .btn-primary {
-  background-color: var(--accent-color);
-  color: var(--text-on-accent);
-  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
 }
 .btn-primary:hover {
-  background-color: var(--accent-color-hover);
-  border-color: var(--accent-color-hover);
+  border-color: var(--accent-color);
+  color: var(--accent-color-hover);
 }
 
 .btn-secondary {
-  background-color: var(--bg-input);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 .btn-secondary:hover {
-  border-color: var(--border-color-focus);
-  background-color: var(--bg-panel);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
 }
 
 .btn-danger {
-  background-color: var(--color-danger);
-  color: var(--text-primary);
-  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
 }
 .btn-danger:hover {
-  background-color: #dc2626;
-  border-color: #dc2626;
+  border-color: var(--color-danger);
+  color: #dc2626;
 }
 
 .btn-text {
@@ -414,7 +410,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 .loader-icon {
   font-size: 48px !important;
-  color: var(--accent-lime);
+  color: var(--accent-color);
   animation: pulse-spin 2s infinite ease-in-out;
 }
 
@@ -455,7 +451,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 .auth-brand-header .logo-icon {
   font-size: 36px !important;
-  color: var(--accent-lime);
+  color: var(--accent-color);
 }
 
 .auth-brand-header .logo-text {
@@ -511,9 +507,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .auth-back-btn:hover {
-  border-color: var(--border-color-focus);
+  border-color: var(--accent-color);
   color: var(--text-primary);
-  background-color: var(--bg-input);
 }
 
 .form-desc {
@@ -616,8 +611,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 16px 20px 8px 20px;
 }
 
 .modal-header h3 {
@@ -649,9 +643,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  margin-top: 12px;
 }
 
 /* Навигационный каркас (Sidebar & Main content) */
@@ -701,6 +693,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  animation: screenFadeIn 0.3s forwards ease-in-out;
 }
 
 .sidebar-top-group {
@@ -786,7 +779,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .sidebar-slim .titlebar-tab.active {
-  color: var(--accent-lime);
+  color: var(--accent-color);
 }
 
 /* Кнопка сворачивания при наведении (голубой оттенок) */
@@ -836,7 +829,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .user-profile-summary.active {
-  border-left-color: var(--accent-lime);
+  border-left-color: var(--accent-color);
   background-color: rgba(163, 230, 53, 0.03);
 }
 
@@ -850,7 +843,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: var(--accent-lime);
+  color: var(--accent-color);
   overflow: hidden;
 }
 
@@ -888,7 +881,6 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 .sidebar-group-title {
   font-size: 10px;
-  text-transform: uppercase;
   color: var(--text-secondary);
   opacity: 0.5;
   font-weight: 700;
@@ -921,7 +913,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .sidebar-nav .nav-item.active {
-  color: var(--accent-lime);
+  color: var(--accent-color);
 }
 
 .logout-btn {
@@ -957,13 +949,12 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: none;
   width: 100%;
   height: 100%;
-  padding: 24px;
+  padding: var(--spacing-layout);
   overflow: hidden;
   overflow-x: hidden;
 }
 
 .tab-content > * {
-  max-width: 1200px;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -979,20 +970,25 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 
 .content-header {
+  position: relative;
+  overflow: hidden;
+  background-color: #181818;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin-bottom: var(--spacing-layout);
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: none;
-  padding-bottom: 0;
-  flex-shrink: 0;
+  gap: 6px;
 }
 
 .content-header h1 {
-  font-size: 31px;
+  font-size: 22px;
   font-weight: 500;
   color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
 }
 
 /* Отступ снизу для прокручиваемой страницы во вкладках финансов, настроек и чек-листов */
@@ -1004,7 +1000,63 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 .content-description {
   font-size: 13px;
   color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
+  margin: 0;
 }
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.header-icon {
+  font-size: 26px;
+  color: var(--accent-color);
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background currency rain styling */
+.header-bg-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rain-drop {
+  position: absolute;
+  top: -30px;
+  color: var(--accent-color);
+  font-family: var(--font-main), monospace;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  animation: fall infinite linear;
+  transition: color 0.3s ease;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(180px);
+  }
+}
+
 
 .tab-placeholder {
   color: var(--text-secondary);
@@ -1069,7 +1121,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .color-swatch:hover {
-  border-color: var(--text-primary);
+  border-color: var(--accent-color);
 }
 
 .color-swatch span {
@@ -1110,16 +1162,16 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .icon-swatch:hover {
-  border-color: var(--border-color-focus);
+  border-color: var(--accent-color);
 }
 
 .icon-swatch.active {
-  border-color: var(--accent-orange);
-  background-color: var(--accent-orange-alpha);
+  border-color: var(--accent-color);
+  background-color: var(--accent-color-alpha);
 }
 
 .icon-swatch.active span {
-  color: var(--accent-orange);
+  color: var(--accent-color);
 }
 
 .categories-list-container {
@@ -1173,10 +1225,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   box-sizing: border-box;
 }
 
-.category-chip:hover {
-  border-color: var(--text-secondary);
-  background-color: rgba(255, 255, 255, 0.04);
-}
+/* .category-chip:hover has been removed */
 
 .category-chip-color {
   width: 10px;
@@ -1410,7 +1459,6 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   position: sticky;
   top: 0;
   z-index: 10;
-  text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.5px;
 }
@@ -1447,9 +1495,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   transition: background-color var(--transition-fast);
 }
 
-.transactions-table tbody tr:hover {
-  background-color: var(--bg-input);
-}
+/* .transactions-table tbody tr:hover has been removed */
 
 .transactions-table tbody tr:last-child td {
   border-bottom: none;
@@ -1563,6 +1609,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .overview-card {
+  position: relative;
+  overflow: hidden;
   border-radius: 6px;
   padding: 22px 24px;
   display: flex;
@@ -1576,6 +1624,18 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   background-size: 300% 300%;
   animation: gradientShift 8s ease infinite;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-decor-img {
+  position: absolute;
+  bottom: -32px;
+  right: -24px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.12;
+  pointer-events: none;
+  transform: rotate(-10deg);
+  z-index: 1;
 }
 
 .summary-card-balance {
@@ -1605,6 +1665,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   align-items: center;
   gap: 8px;
   color: rgba(255, 255, 255, 0.8) !important;
+  position: relative;
+  z-index: 2;
 }
 
 .overview-card .card-meta span.material-symbols-outlined {
@@ -1621,6 +1683,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   font-size: 24px;
   font-weight: 500;
   color: #ffffff !important;
+  position: relative;
+  z-index: 2;
 }
 
 .overview-columns-grid {
@@ -1637,6 +1701,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  gap: var(--spacing-layout);
 }
 
 .overview-column .column-content {
@@ -1742,9 +1807,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   margin-bottom: 2px;
 }
 
-.budget-card:hover {
-  border-color: var(--text-secondary);
-}
+/* .budget-card:hover has been removed */
 
 .budget-card-header {
   display: flex;
@@ -1901,6 +1964,10 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   outline: none;
 }
 
+.custom-select-trigger:hover {
+  border-color: var(--accent-color);
+}
+
 .custom-select-options {
   display: none;
   position: absolute;
@@ -1947,9 +2014,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-layout);
-  max-width: 1200px;
   width: 100%;
-  margin: 0 auto;
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 16px;
@@ -2026,9 +2091,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   text-align: left;
 }
 
-.kanban-task-card:hover {
-  border-color: var(--text-secondary);
-}
+/* .kanban-task-card:hover has been removed */
 
 .kanban-action-btn {
   background: none;
@@ -2060,43 +2123,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   accent-color: var(--accent-color);
 }
 
-/* Специальное оформление Органайзера (Заметки, Чек-листы, Задачи) */
-#tab-notes, 
-#tab-checklists, 
-#tab-tasks {
-  --accent-color: #38bdf8;          /* Голубой */
-  --accent-color-hover: #0284c7;    /* Темно-голубой при ховере */
-  --accent-color-alpha: rgba(56, 189, 248, 0.15); /* Прозрачный голубой */
-}
-
-/* Акцентный цвет для кнопок меню Органайзера в сайдбаре при их активации */
-.sidebar-nav .nav-item[data-target="tab-notes"].active,
-.sidebar-nav .nav-item[data-target="tab-checklists"].active,
-.sidebar-nav .nav-item[data-target="tab-tasks"].active {
-  color: #38bdf8;
-}
-
-/* Специальное оформление Целей Накопления */
-#tab-savings-goals {
-  --accent-color: var(--accent-lime);
-  --accent-color-hover: var(--accent-lime-hover);
-  --accent-color-alpha: var(--accent-lime-alpha);
-}
-
-.sidebar-nav .nav-item[data-target="tab-savings-goals"].active {
-  color: var(--accent-lime);
-}
-
-/* Специальное оформление Категорий (оранжевый) */
-#tab-categories {
-  --accent-color: #ea580c;
-  --accent-color-hover: #c2410c;
-  --accent-color-alpha: rgba(234, 88, 12, 0.15);
-}
-
-.sidebar-nav .nav-item[data-target="tab-categories"].active {
-  color: #ea580c;
-}
+/* Цветовое оформление вкладок унаследовано от глобальной темы */
 
 /* Активное состояние карточек (рамка акцентного цвета вкладки) */
 .budget-card.active {
@@ -2170,7 +2197,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .profile-avatar-upload:hover {
-  border-color: var(--accent-lime);
+  border-color: var(--accent-color);
   transform: scale(1.03);
 }
 
@@ -2374,7 +2401,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .profile-card-item:hover .profile-avatar-circle.add-profile-btn {
-  border-color: var(--accent-lime);
+  border-color: var(--accent-color);
   color: var(--text-primary);
 }
 
@@ -2411,8 +2438,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .pin-dot.filled {
-  background-color: var(--accent-lime);
-  border-color: var(--accent-lime);
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .pin-keyboard-grid {
@@ -2442,8 +2469,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .pin-key-btn:hover {
-  background-color: var(--border-color-focus);
-  border-color: var(--text-muted);
+  border-color: var(--accent-color);
 }
 
 .pin-key-btn:active {
@@ -2460,8 +2486,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 .pin-key-btn.clear-key:hover, .pin-key-btn.backspace-key:hover {
   color: var(--text-primary);
-  background-color: var(--bg-input);
-  border-color: var(--border-color);
+  border-color: var(--accent-color);
 }
 
 .auth-sub-view {
@@ -2476,3 +2501,222 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   display: flex;
 }
 
+/* Баннер уведомления об обновлении (оффер обновиться) */
+.update-toast-banner {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
+  color: var(--text-primary);
+  padding: 14px 18px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  width: 320px;
+  box-sizing: border-box;
+  transform: translateY(20px);
+  opacity: 0;
+  font-family: var(--font-main);
+}
+
+.update-toast-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-toast-icon {
+  color: var(--accent-color);
+  font-size: 20px;
+}
+
+.update-toast-title {
+  font-weight: 700;
+}
+
+.update-toast-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.update-toast-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+
+/* Индикатор обновлений на кнопке вкладки сайдбара */
+.titlebar-tab[data-target="screen-updates"].has-update {
+  position: relative;
+}
+
+.titlebar-tab[data-target="screen-updates"].has-update::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  border: 1px solid var(--bg-main);
+}
+
+
+
+
+/* Темы оформления (акцентные цвета) */
+body[data-theme="white"] {
+  --accent-color: #ffffff;
+  --accent-color-hover: #e4e4e7;
+  --accent-color-alpha: rgba(255, 255, 255, 0.15);
+}
+
+body[data-theme="lime"] {
+  --accent-color: #84cc16;
+  --accent-color-hover: #65a30d;
+  --accent-color-alpha: rgba(132, 204, 22, 0.15);
+}
+
+body[data-theme="cyan"] {
+  --accent-color: #06b6d4;
+  --accent-color-hover: #0891b2;
+  --accent-color-alpha: rgba(6, 182, 212, 0.15);
+}
+
+body[data-theme="blue"] {
+  --accent-color: #3b82f6;
+  --accent-color-hover: #2563eb;
+  --accent-color-alpha: rgba(59, 130, 246, 0.15);
+}
+
+body[data-theme="purple"] {
+  --accent-color: #8b5cf6;
+  --accent-color-hover: #7c3aed;
+  --accent-color-alpha: rgba(139, 92, 246, 0.15);
+}
+
+body[data-theme="pink"] {
+  --accent-color: #ec4899;
+  --accent-color-hover: #db2777;
+  --accent-color-alpha: rgba(236, 72, 153, 0.15);
+}
+
+body[data-theme="red"] {
+  --accent-color: #ef4444;
+  --accent-color-hover: #dc2626;
+  --accent-color-alpha: rgba(239, 68, 68, 0.15);
+}
+
+body[data-theme="orange"] {
+  --accent-color: #f59e0b;
+  --accent-color-hover: #d97706;
+  --accent-color-alpha: rgba(245, 158, 11, 0.15);
+}
+
+body[data-theme="teal"] {
+  --accent-color: #14b8a6;
+  --accent-color-hover: #0d9488;
+  --accent-color-alpha: rgba(20, 184, 166, 0.15);
+}
+
+body[data-theme="mint"] {
+  --accent-color: #91ffc6;
+  --accent-color-hover: #76e0a9;
+  --accent-color-alpha: rgba(145, 255, 198, 0.15);
+}
+
+body[data-theme="lavender"] {
+  --accent-color: #919cff;
+  --accent-color-hover: #7681e0;
+  --accent-color-alpha: rgba(145, 156, 255, 0.15);
+}
+
+body[data-theme="sky"] {
+  --accent-color: #91e4ff;
+  --accent-color-hover: #76c8e0;
+  --accent-color-alpha: rgba(145, 228, 255, 0.15);
+}
+
+body[data-theme="lilac"] {
+  --accent-color: #b491ff;
+  --accent-color-hover: #9875e0;
+  --accent-color-alpha: rgba(180, 145, 255, 0.15);
+}
+
+body[data-theme="blossom"] {
+  --accent-color: #ff91fd;
+  --accent-color-hover: #e076de;
+  --accent-color-alpha: rgba(255, 145, 253, 0.15);
+}
+
+body[data-theme="coral"] {
+  --accent-color: #ff9191;
+  --accent-color-hover: #e07676;
+  --accent-color-alpha: rgba(255, 145, 145, 0.15);
+}
+
+body[data-theme="pastel-lime"] {
+  --accent-color: #ceff91;
+  --accent-color-hover: #b0e076;
+  --accent-color-alpha: rgba(206, 255, 145, 0.15);
+}
+
+/* Стили переключателя тем */
+.theme-swatch {
+  width: 44px;
+  height: 44px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-swatch:hover {
+  transform: scale(1.05);
+}
+
+.theme-swatch.active {
+  border-color: transparent !important;
+}
+
+.theme-swatch span {
+  color: #121212;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.theme-swatch.active span {
+  opacity: 1;
+}
+
+/* Скрыть сайдбар на экране входа */
+body.auth-mode .sidebar-slim {
+  display: none;
+}
+
+/* Анимация валютного дождя на весь экран входа */
+@keyframes fall-full {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(105vh);
+  }
+}
+
+.auth-rain .rain-drop {
+  animation-name: fall-full;
+  top: -40px;
+}
