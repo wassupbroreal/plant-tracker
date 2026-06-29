@@ -18,13 +18,45 @@ export const productivityMethods = {
 
     if (this.noteAddBtn) {
       this.noteAddBtn.addEventListener('click', () => {
-        const newNote = db.addNote({ title: 'Новая заметка', content: '' });
-        this.activeNoteId = newNote.id;
-        this.renderNotes(newNote.id);
-        this.renderOverview();
-        if (this.noteTitleEditor) {
-          this.noteTitleEditor.focus();
-          this.noteTitleEditor.select();
+        if (this.addNoteModal) {
+          this.addNoteModal.classList.add('active');
+          if (this.addNoteModalForm) this.addNoteModalForm.reset();
+          if (this.modalNoteTitle) this.modalNoteTitle.focus();
+        }
+      });
+    }
+
+    if (this.closeAddNoteModal) {
+      this.closeAddNoteModal.addEventListener('click', () => {
+        if (this.addNoteModal) this.addNoteModal.classList.remove('active');
+      });
+    }
+
+    if (this.btnAddNoteCancel) {
+      this.btnAddNoteCancel.addEventListener('click', () => {
+        if (this.addNoteModal) this.addNoteModal.classList.remove('active');
+      });
+    }
+
+    if (this.addNoteModal) {
+      this.addNoteModal.addEventListener('click', (e) => {
+        if (e.target === this.addNoteModal) {
+          this.addNoteModal.classList.remove('active');
+        }
+      });
+    }
+
+    if (this.addNoteModalForm) {
+      this.addNoteModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = this.formatSentenceCase(this.modalNoteTitle.value.trim());
+        if (title) {
+          const newNote = db.addNote({ title, content: '' });
+          if (this.addNoteModal) this.addNoteModal.classList.remove('active');
+          if (this.addNoteModalForm) this.addNoteModalForm.reset();
+          this.activeNoteId = newNote.id;
+          this.renderNotes(newNote.id);
+          this.renderOverview();
         }
       });
     }
@@ -53,7 +85,7 @@ export const productivityMethods = {
         const content = this.noteContentEditor.value.trim();
         if (id) {
           db.updateNote(id, { title, content });
-          alert('Заметка сохранена!');
+          this.showToast('Заметка сохранена');
           this.renderNotes();
           this.renderOverview();
         }
@@ -93,12 +125,44 @@ export const productivityMethods = {
 
     if (this.checklistAddBtn) {
       this.checklistAddBtn.addEventListener('click', () => {
-        const newList = db.addChecklist({ title: 'Новый список' });
-        this.activeChecklistId = newList.id;
-        this.renderChecklists(newList.id);
-        if (this.checklistTitleEditor) {
-          this.checklistTitleEditor.focus();
-          this.checklistTitleEditor.select();
+        if (this.addChecklistModal) {
+          this.addChecklistModal.classList.add('active');
+          if (this.addChecklistModalForm) this.addChecklistModalForm.reset();
+          if (this.modalChecklistTitle) this.modalChecklistTitle.focus();
+        }
+      });
+    }
+
+    if (this.closeAddChecklistModal) {
+      this.closeAddChecklistModal.addEventListener('click', () => {
+        if (this.addChecklistModal) this.addChecklistModal.classList.remove('active');
+      });
+    }
+
+    if (this.btnAddChecklistCancel) {
+      this.btnAddChecklistCancel.addEventListener('click', () => {
+        if (this.addChecklistModal) this.addChecklistModal.classList.remove('active');
+      });
+    }
+
+    if (this.addChecklistModal) {
+      this.addChecklistModal.addEventListener('click', (e) => {
+        if (e.target === this.addChecklistModal) {
+          this.addChecklistModal.classList.remove('active');
+        }
+      });
+    }
+
+    if (this.addChecklistModalForm) {
+      this.addChecklistModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = this.formatSentenceCase(this.modalChecklistTitle.value.trim());
+        if (title) {
+          const newList = db.addChecklist({ title });
+          if (this.addChecklistModal) this.addChecklistModal.classList.remove('active');
+          if (this.addChecklistModalForm) this.addChecklistModalForm.reset();
+          this.activeChecklistId = newList.id;
+          this.renderChecklists(newList.id);
         }
       });
     }
@@ -164,7 +228,7 @@ export const productivityMethods = {
             };
           });
           db.updateChecklist(id, { title, items });
-          alert('Чек-лист сохранен!');
+          this.showToast('Чек-лист сохранен');
           this.renderChecklists();
         }
       });
@@ -312,20 +376,12 @@ export const productivityMethods = {
           }
         }
       }
-
-      const contentPreview = note.content
-        ? this.escapeHtml(note.content)
-        : '<span class="text-muted" style="font-style: italic;">Нет текста</span>';
-
       card.innerHTML = `
-        <div class="budget-card-header" style="pointer-events: none;">
+        <div class="budget-card-header" style="pointer-events: none; margin-bottom: 0;">
           <div class="budget-card-title" style="color: var(--accent-color);">
             <span class="material-symbols-outlined">description</span>
             <span>${this.formatSentenceCase(this.escapeHtml(note.title))}</span>
           </div>
-        </div>
-        <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; pointer-events: none;">
-          ${contentPreview}
         </div>
       `;
 
@@ -419,22 +475,12 @@ export const productivityMethods = {
       card.className = `budget-card${list.id === this.activeChecklistId ? ' active' : ''}`;
       card.style.cursor = 'pointer';
 
-      const totalItems = list.items ? list.items.length : 0;
-      const checkedItems = list.items ? list.items.filter(item => item.checked).length : 0;
-      
-      const progressText = totalItems > 0 
-        ? `Выполнено: ${checkedItems} из ${totalItems}`
-        : '<span class="text-muted" style="font-style: italic;">Список пуст</span>';
-
       card.innerHTML = `
-        <div class="budget-card-header" style="pointer-events: none;">
+        <div class="budget-card-header" style="pointer-events: none; margin-bottom: 0;">
           <div class="budget-card-title" style="color: var(--accent-color);">
             <span class="material-symbols-outlined">playlist_add_check</span>
             <span>${this.formatSentenceCase(this.escapeHtml(list.title))}</span>
           </div>
-        </div>
-        <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px; pointer-events: none;">
-          ${progressText}
         </div>
       `;
 

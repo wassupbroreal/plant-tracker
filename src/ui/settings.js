@@ -173,6 +173,13 @@ export const settingsMethods = {
         };
         reader.readAsText(file);
       });
+
+      const importTriggerBtn = document.getElementById('import-trigger-btn');
+      if (importTriggerBtn) {
+        importTriggerBtn.addEventListener('click', () => {
+          this.settingsImportFile.click();
+        });
+      }
     }
 
     if (this.settingsResetBtn) {

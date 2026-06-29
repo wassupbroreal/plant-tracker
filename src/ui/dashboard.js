@@ -128,9 +128,6 @@ export const dashboardMethods = {
         <div class="budget-card-bar" style="--bar-base-color: ${cat.color};">
           <div class="budget-card-progress" style="width: ${percent}%;"></div>
         </div>
-        <div class="budget-card-status ${statusClass}" style="color: ${barColor};">
-          ${this.formatSentenceCase(statusLabel)} (${percent.toFixed(0)}%)
-        </div>
       `;
       container.appendChild(card);
     });
@@ -170,9 +167,6 @@ export const dashboardMethods = {
         </div>
         <div class="budget-card-bar" style="--bar-base-color: var(--accent-color);">
           <div class="budget-card-progress" style="width: ${percent}%;"></div>
-        </div>
-        <div class="budget-card-status text-accent" style="color: var(--accent-color);">
-          Прогресс: ${percent.toFixed(0)}%
         </div>
       `;
       container.appendChild(card);

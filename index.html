@@ -22,10 +22,10 @@
         </div>
         <div class="titlebar-drag-spacer" data-tauri-drag-region></div>
         <div class="titlebar-controls">
-          <button class="titlebar-ctrl-btn no-drag" id="titlebar-minimize">
+          <button type="button" class="titlebar-ctrl-btn no-drag" id="titlebar-minimize">
             <span class="material-symbols-outlined">minimize</span>
           </button>
-          <button class="titlebar-ctrl-btn no-drag" id="titlebar-close">
+          <button type="button" class="titlebar-ctrl-btn no-drag" id="titlebar-close">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -35,26 +35,26 @@
         <!-- Левый узкий сайдбар (Slim Sidebar) -->
         <aside class="sidebar-slim">
           <div class="sidebar-top-group">
-            <button class="sidebar-profile-btn-slim titlebar-tab no-drag" id="sidebar-profile-btn" data-target="screen-profile">
+            <button type="button" class="sidebar-profile-btn-slim titlebar-tab no-drag" id="sidebar-profile-btn" data-target="screen-profile">
               <span class="material-symbols-outlined">person</span>
             </button>
             <div class="sidebar-tabs-slim">
-              <button class="titlebar-tab active no-drag" data-target="screen-home">
+              <button type="button" class="titlebar-tab active no-drag" data-target="screen-home">
                 <span class="material-symbols-outlined">home</span>
               </button>
-              <button class="titlebar-tab no-drag" data-target="screen-about">
+              <button type="button" class="titlebar-tab no-drag" data-target="screen-about">
                 <span class="material-symbols-outlined">info</span>
               </button>
-              <button class="titlebar-tab no-drag" data-target="screen-updates">
+              <button type="button" class="titlebar-tab no-drag" data-target="screen-updates">
                 <span class="material-symbols-outlined">deployed_code</span>
               </button>
             </div>
           </div>
           <div class="sidebar-bottom-group">
-            <button class="titlebar-tab no-drag" data-target="screen-settings" id="sidebar-settings-btn">
+            <button type="button" class="titlebar-tab no-drag" data-target="screen-settings" id="sidebar-settings-btn">
               <span class="material-symbols-outlined">settings</span>
             </button>
-            <button class="sidebar-ctrl-btn no-drag" id="logout-btn">
+            <button type="button" class="sidebar-ctrl-btn no-drag" id="logout-btn">
               <span class="material-symbols-outlined">logout</span>
             </button>
           </div>
@@ -146,7 +146,7 @@
           <nav class="sidebar-nav">
             <!-- Группа 1: Обзор -->
             <div class="sidebar-nav-group">
-              <button class="nav-item active" data-target="tab-overview">
+              <button type="button" class="nav-item active" data-target="tab-overview">
                 <span class="material-symbols-outlined">public</span>
                 <span>Обзор</span>
               </button>
@@ -155,19 +155,19 @@
             <!-- Группа 2: Финансовые операции -->
             <div class="sidebar-nav-group">
               <div class="sidebar-group-title">Финансы</div>
-              <button class="nav-item" data-target="tab-transactions">
+              <button type="button" class="nav-item" data-target="tab-transactions">
                 <span class="material-symbols-outlined">payments</span>
                 <span>Транзакции</span>
               </button>
-              <button class="nav-item" data-target="tab-planning">
+              <button type="button" class="nav-item" data-target="tab-planning">
                 <span class="material-symbols-outlined">event_upcoming</span>
                 <span>Планирование</span>
               </button>
-              <button class="nav-item" data-target="tab-budgets">
+              <button type="button" class="nav-item" data-target="tab-budgets">
                 <span class="material-symbols-outlined">account_balance_wallet</span>
                 <span>Бюджеты</span>
               </button>
-              <button class="nav-item" data-target="tab-savings-goals">
+              <button type="button" class="nav-item" data-target="tab-savings-goals">
                 <span class="material-symbols-outlined">track_changes</span>
                 <span>Цели</span>
               </button>
@@ -176,7 +176,7 @@
             <!-- Группа 3: Справочники -->
             <div class="sidebar-nav-group">
               <div class="sidebar-group-title">Справочники</div>
-              <button class="nav-item" data-target="tab-categories">
+              <button type="button" class="nav-item" data-target="tab-categories">
                 <span class="material-symbols-outlined">sell</span>
                 <span>Категории</span>
               </button>
@@ -185,15 +185,15 @@
             <!-- Группа 4: Личная эффективность -->
             <div class="sidebar-nav-group">
               <div class="sidebar-group-title">Органайзер</div>
-              <button class="nav-item" data-target="tab-notes">
+              <button type="button" class="nav-item" data-target="tab-notes">
                 <span class="material-symbols-outlined">description</span>
                 <span>Заметки</span>
               </button>
-              <button class="nav-item" data-target="tab-checklists">
+              <button type="button" class="nav-item" data-target="tab-checklists">
                 <span class="material-symbols-outlined">fact_check</span>
                 <span>Чек-листы</span>
               </button>
-              <button class="nav-item" data-target="tab-tasks">
+              <button type="button" class="nav-item" data-target="tab-tasks">
                 <span class="material-symbols-outlined">assignment</span>
                 <span>Задачи</span>
               </button>
@@ -368,7 +368,7 @@
                       <span class="material-symbols-outlined">search</span>
                       <input type="text" id="transaction-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                     </div>
-                    <button class="filter-reset-icon-btn" id="reset-filters-btn">
+                    <button type="button" class="filter-reset-icon-btn" id="reset-filters-btn">
                       <span class="material-symbols-outlined">restart_alt</span>
                     </button>
                   </div>
@@ -560,7 +560,7 @@
                     <span class="material-symbols-outlined">search</span>
                     <input type="text" id="budget-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                   </div>
-                  <button class="filter-reset-icon-btn" id="budget-reset-filters-btn">
+                  <button type="button" class="filter-reset-icon-btn" id="budget-reset-filters-btn">
                     <span class="material-symbols-outlined">restart_alt</span>
                   </button>
                 </div>
@@ -620,7 +620,7 @@
                     <span class="material-symbols-outlined">search</span>
                     <input type="text" id="goal-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                   </div>
-                  <button class="filter-reset-icon-btn" id="goal-reset-filters-btn">
+                  <button type="button" class="filter-reset-icon-btn" id="goal-reset-filters-btn">
                     <span class="material-symbols-outlined">restart_alt</span>
                   </button>
                 </div>
@@ -722,16 +722,16 @@
                   <span class="material-symbols-outlined">search</span>
                   <input type="text" id="note-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 </div>
-                <button class="filter-reset-icon-btn" id="note-reset-search-btn">
+                <button type="button" class="filter-reset-icon-btn" id="note-reset-search-btn">
                   <span class="material-symbols-outlined">restart_alt</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="note-add-btn">
+                <button type="button" class="filter-reset-icon-btn" id="note-add-btn">
                   <span class="material-symbols-outlined">note_add</span>
                 </button>
                 <button class="filter-reset-icon-btn" id="note-save-btn" type="submit" form="note-editor-form">
                   <span class="material-symbols-outlined">save</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="note-delete-btn">
+                <button type="button" class="filter-reset-icon-btn" id="note-delete-btn">
                   <span class="material-symbols-outlined">delete</span>
                 </button>
               </div>
@@ -786,19 +786,19 @@
                   <span class="material-symbols-outlined">search</span>
                   <input type="text" id="checklist-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 </div>
-                <button class="filter-reset-icon-btn" id="checklist-reset-search-btn">
+                <button type="button" class="filter-reset-icon-btn" id="checklist-reset-search-btn">
                   <span class="material-symbols-outlined">restart_alt</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="checklist-add-btn">
+                <button type="button" class="filter-reset-icon-btn" id="checklist-add-btn">
                   <span class="material-symbols-outlined">playlist_add</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="checklist-add-item-btn">
+                <button type="button" class="filter-reset-icon-btn" id="checklist-add-item-btn">
                   <span class="material-symbols-outlined">add</span>
                 </button>
                 <button class="filter-reset-icon-btn" id="checklist-save-btn" type="submit" form="checklist-editor-form">
                   <span class="material-symbols-outlined">save</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="checklist-delete-btn">
+                <button type="button" class="filter-reset-icon-btn" id="checklist-delete-btn">
                   <span class="material-symbols-outlined">delete</span>
                 </button>
               </div>
@@ -855,10 +855,10 @@
                   <span class="material-symbols-outlined">search</span>
                   <input type="text" id="task-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 </div>
-                <button class="filter-reset-icon-btn" id="task-reset-search-btn">
+                <button type="button" class="filter-reset-icon-btn" id="task-reset-search-btn">
                   <span class="material-symbols-outlined">restart_alt</span>
                 </button>
-                <button class="filter-reset-icon-btn" id="task-add-btn">
+                <button type="button" class="filter-reset-icon-btn" id="task-add-btn">
                   <span class="material-symbols-outlined">playlist_add</span>
                 </button>
               </div>
@@ -1140,52 +1140,52 @@
                 Выберите основной акцентный цвет интерфейса приложения PLANT.
               </p>
               <div class="theme-picker-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="theme-swatch" data-theme="white" style="background-color: #ffffff;" title="Белый">
+                <button class="theme-swatch" data-theme="white" style="background-color: #ffffff;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="lime" style="background-color: #84cc16;" title="Лаймовый">
+                <button class="theme-swatch" data-theme="lime" style="background-color: #84cc16;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="cyan" style="background-color: #06b6d4;" title="Голубой">
+                <button class="theme-swatch" data-theme="cyan" style="background-color: #06b6d4;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="blue" style="background-color: #3b82f6;" title="Синий">
+                <button class="theme-swatch" data-theme="blue" style="background-color: #3b82f6;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="purple" style="background-color: #8b5cf6;" title="Фиолетовый">
+                <button class="theme-swatch" data-theme="purple" style="background-color: #8b5cf6;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="pink" style="background-color: #ec4899;" title="Розовый">
+                <button class="theme-swatch" data-theme="pink" style="background-color: #ec4899;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="red" style="background-color: #ef4444;" title="Красный">
+                <button class="theme-swatch" data-theme="red" style="background-color: #ef4444;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="orange" style="background-color: #f59e0b;" title="Оранжевый">
+                <button class="theme-swatch" data-theme="orange" style="background-color: #f59e0b;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="teal" style="background-color: #14b8a6;" title="Бирюзовый">
+                <button class="theme-swatch" data-theme="teal" style="background-color: #14b8a6;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="mint" style="background-color: #91ffc6;" title="Мятный">
+                <button class="theme-swatch" data-theme="mint" style="background-color: #91ffc6;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="lavender" style="background-color: #919cff;" title="Лавандовый">
+                <button class="theme-swatch" data-theme="lavender" style="background-color: #919cff;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="sky" style="background-color: #91e4ff;" title="Небесный">
+                <button class="theme-swatch" data-theme="sky" style="background-color: #91e4ff;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="lilac" style="background-color: #b491ff;" title="Сиреневый">
+                <button class="theme-swatch" data-theme="lilac" style="background-color: #b491ff;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="blossom" style="background-color: #ff91fd;" title="Цветочный">
+                <button class="theme-swatch" data-theme="blossom" style="background-color: #ff91fd;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="coral" style="background-color: #ff9191;" title="Коралловый">
+                <button class="theme-swatch" data-theme="coral" style="background-color: #ff9191;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button class="theme-swatch" data-theme="pastel-lime" style="background-color: #ceff91;" title="Светло-лимонный">
+                <button class="theme-swatch" data-theme="pastel-lime" style="background-color: #ceff91;">
                   <span class="material-symbols-outlined">check</span>
                 </button>
               </div>
@@ -1221,16 +1221,14 @@
               </p>
               
               <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <button id="settings-export-btn" class="btn btn-primary">
+                <button type="button" id="settings-export-btn" class="btn btn-primary">
                   <span>Экспорт в json</span>
                 </button>
                 
-                <div style="position: relative; overflow: hidden; display: inline-block;">
-                  <button class="btn btn-primary" id="import-trigger-btn" type="button">
-                    <span>Импорт из json</span>
-                  </button>
-                  <input type="file" id="settings-import-file" accept=".json" style="position: absolute; left: 0; top: 0; opacity: 0; font-size: 100px; cursor: pointer; width: 100%; height: 100%;">
-                </div>
+                <button class="btn btn-primary" id="import-trigger-btn" type="button">
+                  <span>Импорт из json</span>
+                </button>
+                <input type="file" id="settings-import-file" accept=".json" style="display: none;">
               </div>
             </div>
 
@@ -1242,7 +1240,7 @@
               </p>
               
               <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <button id="settings-reset-btn" class="btn btn-danger">
+                <button type="button" id="settings-reset-btn" class="btn btn-danger">
                   <span>Сбросить все данные</span>
                 </button>
                 
@@ -1283,12 +1281,56 @@
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
           <p id="confirm-modal-message" style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; white-space: pre-wrap;"></p>
           <div class="modal-footer" style="margin-top: 0;">
-            <button id="btn-confirm-cancel" class="btn btn-secondary">Отмена</button>
-            <button id="btn-confirm-ok" class="btn btn-primary">Подтвердить</button>
+            <button type="button" id="btn-confirm-cancel" class="btn btn-secondary">Отмена</button>
+            <button type="button" id="btn-confirm-ok" class="btn btn-primary">Подтвердить</button>
           </div>
         </div>
       </div>
     </div>
+    <!-- Кастомное модальное окно для добавления заметки -->
+    <div id="add-note-modal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3 id="add-note-modal-title">Добавить заметку</h3>
+          <div class="modal-close" id="close-add-note-modal">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+        </div>
+        <form id="add-note-modal-form" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label for="modal-note-title">Название</label>
+            <input type="text" id="modal-note-title" required placeholder="Назовите заметку..." autocomplete="off">
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="btn-add-note-cancel" class="btn btn-secondary">Отмена</button>
+            <button type="submit" id="btn-add-note-submit" class="btn btn-primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Кастомное модальное окно для добавления чек-листа -->
+    <div id="add-checklist-modal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3 id="add-checklist-modal-title">Добавить чек-лист</h3>
+          <div class="modal-close" id="close-add-checklist-modal">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+        </div>
+        <form id="add-checklist-modal-form" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label for="modal-checklist-title">Название</label>
+            <input type="text" id="modal-checklist-title" required placeholder="Назовите чек-лист..." autocomplete="off">
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="btn-add-checklist-cancel" class="btn btn-secondary">Отмена</button>
+            <button type="submit" id="btn-add-checklist-submit" class="btn btn-primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Кастомное модальное окно для добавления/редактирования задачи -->
     <div id="add-task-modal" class="modal-overlay">
       <div class="modal-box" style="max-width: 400px;">

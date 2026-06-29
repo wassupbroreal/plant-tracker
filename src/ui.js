@@ -171,6 +171,22 @@ export const ui = {
     this.activeNoteId = null;
     this.lastActiveNoteId = null;
 
+    // Модальное окно заметок
+    this.addNoteModal = document.getElementById('add-note-modal');
+    this.closeAddNoteModal = document.getElementById('close-add-note-modal');
+    this.addNoteModalForm = document.getElementById('add-note-modal-form');
+    this.modalNoteTitle = document.getElementById('modal-note-title');
+    this.btnAddNoteCancel = document.getElementById('btn-add-note-cancel');
+    this.btnAddNoteSubmit = document.getElementById('btn-add-note-submit');
+
+    // Модальное окно чек-листов
+    this.addChecklistModal = document.getElementById('add-checklist-modal');
+    this.closeAddChecklistModal = document.getElementById('close-add-checklist-modal');
+    this.addChecklistModalForm = document.getElementById('add-checklist-modal-form');
+    this.modalChecklistTitle = document.getElementById('modal-checklist-title');
+    this.btnAddChecklistCancel = document.getElementById('btn-add-checklist-cancel');
+    this.btnAddChecklistSubmit = document.getElementById('btn-add-checklist-submit');
+
     // Чек-листы DOM
     this.checklistsSidebarList = document.getElementById('checklists-sidebar-list');
     this.checklistSearch = document.getElementById('checklist-search');

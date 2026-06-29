@@ -41,6 +41,8 @@ export const db = {
     if (!localStorage.getItem('plant_profiles')) {
       localStorage.setItem('plant_profiles', JSON.stringify([]));
     }
+    // Сбрасываем активную сессию при каждом запуске приложения
+    this.clearUser();
   },
 
   // Инициализация данных под конкретный профиль
