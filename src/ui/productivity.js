@@ -399,7 +399,7 @@ export const productivityMethods = {
           setTimeout(() => {
             this.activeNoteId = note.id;
             this.renderNotes(null, true);
-          }, 300);
+          }, 150);
         } else {
           this.activeNoteId = note.id;
           this.renderNotes(null, true);
@@ -498,7 +498,7 @@ export const productivityMethods = {
           setTimeout(() => {
             this.activeChecklistId = list.id;
             this.renderChecklists(null, true);
-          }, 300);
+          }, 150);
         } else {
           this.activeChecklistId = list.id;
           this.renderChecklists(null, true);
@@ -596,6 +596,111 @@ export const productivityMethods = {
   },
 
   // --- ЛОГИКА ЗАДАЧ (KANBAN) ---
+  createCardElement(task) {
+    const card = document.createElement('div');
+    card.className = `kanban-task-card status-${task.status.replace('_', '-')}`;
+    card.setAttribute('data-task-id', task.id);
+    this.populateCard(card, task);
+    return card;
+  },
+
+  populateCard(card, task) {
+    let statusColor = '#ffffff';
+    if (task.status === 'in_progress') {
+      statusColor = '#38bdf8';
+    } else if (task.status === 'done') {
+      statusColor = '#22c55e';
+    }
+
+    card.innerHTML = `
+      <div class="budget-card-header">
+        <div class="budget-card-title" style="color: ${statusColor};">
+          <span class="material-symbols-outlined">assignment</span>
+          <span>${this.formatSentenceCase(this.escapeHtml(task.title))}</span>
+        </div>
+        <div class="budget-card-actions">
+          ${task.status !== 'todo' ? `
+            <button class="category-action-btn move-left" style="margin-right: 4px;">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+          ` : ''}
+          ${task.status !== 'done' ? `
+            <button class="category-action-btn move-right" style="margin-right: 4px;">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          ` : ''}
+          <button class="category-action-btn edit" style="margin-right: 4px;">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+          <button class="category-action-btn delete">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </div>
+      ${task.description ? `<div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; word-break: break-word; white-space: pre-wrap; text-align: left;">${this.formatSentenceCase(this.escapeHtml(task.description))}</div>` : ''}
+    `;
+
+    const moveLeftBtn = card.querySelector('.move-left');
+    if (moveLeftBtn) {
+      moveLeftBtn.addEventListener('click', () => {
+        const nextStatus = task.status === 'done' ? 'in_progress' : 'todo';
+        card.classList.add('task-card-slide-out');
+        card.addEventListener('animationend', () => {
+          db.updateTask(task.id, { status: nextStatus });
+          this.renderTasks(task.id);
+          this.renderOverview();
+        }, { once: true });
+      });
+    }
+
+    const moveRightBtn = card.querySelector('.move-right');
+    if (moveRightBtn) {
+      moveRightBtn.addEventListener('click', () => {
+        const nextStatus = task.status === 'todo' ? 'in_progress' : 'done';
+        card.classList.add('task-card-slide-out');
+        card.addEventListener('animationend', () => {
+          db.updateTask(task.id, { status: nextStatus });
+          this.renderTasks(task.id);
+          this.renderOverview();
+        }, { once: true });
+      });
+    }
+
+    const editBtn = card.querySelector('.edit');
+    if (editBtn) {
+      editBtn.addEventListener('click', () => {
+        if (this.addTaskModal) {
+          if (this.modalTaskId) this.modalTaskId.value = task.id;
+          if (this.addTaskModalTitle) this.addTaskModalTitle.textContent = 'Редактировать задачу';
+          if (this.btnAddTaskSubmit) this.btnAddTaskSubmit.textContent = 'Сохранить';
+          if (this.modalTaskTitle) this.modalTaskTitle.value = task.title;
+          if (this.modalTaskDesc) this.modalTaskDesc.value = task.description || '';
+          this.addTaskModal.classList.add('active');
+          if (this.modalTaskTitle) this.modalTaskTitle.focus();
+        }
+      });
+    }
+
+    const deleteBtn = card.querySelector('.delete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (await this.showConfirm(`Удалить задачу "${this.formatSentenceCase(task.title)}"?`)) {
+          card.classList.add('task-card-slide-out');
+          card.addEventListener('animationend', () => {
+            db.deleteTask(task.id);
+            this.renderTasks();
+            this.renderOverview();
+          }, { once: true });
+        }
+      });
+    }
+  },
+
+  updateCardContent(card, task) {
+    card.className = `kanban-task-card status-${task.status.replace('_', '-')}`;
+    this.populateCard(card, task);
+  },
+
   renderTasks(highlightId = null) {
     const tasks = db.getTasks();
     
@@ -605,9 +710,7 @@ export const productivityMethods = {
       done: document.getElementById('list-done')
     };
 
-    Object.values(lists).forEach(l => {
-      if (l) l.innerHTML = '';
-    });
+    if (!lists.todo && !lists.in_progress && !lists.done) return;
 
     const searchVal = this.taskSearch ? this.taskSearch.value.trim().toLowerCase() : '';
     const filtered = tasks.filter(task => {
@@ -618,98 +721,79 @@ export const productivityMethods = {
       return true;
     });
 
+    // 1. Создаем карту существующих на доске карточек: taskId -> cardElement
+    const currentCardsMap = new Map();
+    Object.values(lists).forEach(list => {
+      if (!list) return;
+      const cards = list.querySelectorAll('.kanban-task-card');
+      cards.forEach(card => {
+        const tid = card.getAttribute('data-task-id');
+        if (tid) {
+          currentCardsMap.set(tid, card);
+        }
+      });
+    });
+
+    // 2. Рендерим отфильтрованные задачи
     filtered.forEach(task => {
       const targetList = lists[task.status];
-      if (targetList) {
-        const card = document.createElement('div');
-        card.className = `kanban-task-card status-${task.status.replace('_', '-')}`;
-        
-        let statusColor = '#ffffff';
-        if (task.status === 'in_progress') {
-          statusColor = '#38bdf8';
-        } else if (task.status === 'done') {
-          statusColor = '#22c55e';
+      if (!targetList) return;
+
+      const existingCard = currentCardsMap.get(task.id);
+
+      if (existingCard) {
+        if (existingCard.parentElement === targetList) {
+          // И в правильной колонке — просто обновляем содержимое in-place
+          this.updateCardContent(existingCard, task);
+          // Убираем из карты удаления, так как она остается
+          currentCardsMap.delete(task.id);
         }
-
-        card.innerHTML = `
-          <div class="budget-card-header">
-            <div class="budget-card-title" style="color: ${statusColor};">
-              <span class="material-symbols-outlined">assignment</span>
-              <span>${this.formatSentenceCase(this.escapeHtml(task.title))}</span>
-            </div>
-            <div class="budget-card-actions">
-              ${task.status !== 'todo' ? `
-                <button class="category-action-btn move-left" style="margin-right: 4px;">
-                  <span class="material-symbols-outlined">arrow_back</span>
-                </button>
-              ` : ''}
-              ${task.status !== 'done' ? `
-                <button class="category-action-btn move-right" style="margin-right: 4px;">
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-              ` : ''}
-              <button class="category-action-btn edit" style="margin-right: 4px;">
-                <span class="material-symbols-outlined">edit</span>
-              </button>
-              <button class="category-action-btn delete">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          </div>
-          ${task.description ? `<div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; word-break: break-word; white-space: pre-wrap; text-align: left;">${this.formatSentenceCase(this.escapeHtml(task.description))}</div>` : ''}
-        `;
-
-        const moveLeftBtn = card.querySelector('.move-left');
-        if (moveLeftBtn) {
-          moveLeftBtn.addEventListener('click', () => {
-            const nextStatus = task.status === 'done' ? 'in_progress' : 'todo';
-            db.updateTask(task.id, { status: nextStatus });
-            this.renderTasks();
-          });
-        }
-
-        const moveRightBtn = card.querySelector('.move-right');
-        if (moveRightBtn) {
-          moveRightBtn.addEventListener('click', () => {
-            const nextStatus = task.status === 'todo' ? 'in_progress' : 'done';
-            db.updateTask(task.id, { status: nextStatus });
-            this.renderTasks();
-          });
-        }
-
-        const editBtn = card.querySelector('.edit');
-        if (editBtn) {
-          editBtn.addEventListener('click', () => {
-            if (this.addTaskModal) {
-              if (this.modalTaskId) this.modalTaskId.value = task.id;
-              if (this.addTaskModalTitle) this.addTaskModalTitle.textContent = 'Редактировать задачу';
-              if (this.btnAddTaskSubmit) this.btnAddTaskSubmit.textContent = 'Сохранить';
-              if (this.modalTaskTitle) this.modalTaskTitle.value = task.title;
-              if (this.modalTaskDesc) this.modalTaskDesc.value = task.description || '';
-              this.addTaskModal.classList.add('active');
-              if (this.modalTaskTitle) this.modalTaskTitle.focus();
-            }
-          });
-        }
-
-        card.querySelector('.delete').addEventListener('click', async () => {
-          if (await this.showConfirm(`Удалить задачу "${this.formatSentenceCase(task.title)}"?`)) {
-            db.deleteTask(task.id);
-            this.renderTasks();
-          }
-        });
-
-        targetList.appendChild(card);
       }
     });
 
+    // 3. Все оставшиеся в currentCardsMap карточки должны быть плавно удалены
+    currentCardsMap.forEach((card, tid) => {
+      if (card.classList.contains('task-card-slide-out')) {
+        card.remove();
+      } else {
+        card.classList.add('task-card-slide-out');
+        card.addEventListener('animationend', () => {
+          card.remove();
+        }, { once: true });
+      }
+    });
+
+    // 4. Добавляем карточки для задач, которых еще нет в целевых колонках
+    filtered.forEach(task => {
+      const targetList = lists[task.status];
+      if (!targetList) return;
+
+      const alreadyInTarget = targetList.querySelector(`[data-task-id="${task.id}"]`);
+      if (alreadyInTarget && !alreadyInTarget.classList.contains('task-card-slide-out')) {
+        return;
+      }
+
+      // Создаем новую карточку
+      const card = this.createCardElement(task);
+      card.classList.add('task-card-slide-in');
+      
+      card.addEventListener('animationend', () => {
+        card.classList.remove('task-card-slide-in');
+      }, { once: true });
+
+      targetList.appendChild(card);
+    });
+
+    // 5. Если есть подсветка ( highlightId ), применим временный импульс
     if (highlightId) {
-      const task = tasks.find(t => t.id === highlightId);
-      if (task) {
-        const targetList = lists[task.status];
-        if (targetList) {
-          this.animateBlock(targetList);
-        }
+      const targetCard = document.querySelector(`[data-task-id="${highlightId}"]`);
+      if (targetCard) {
+        targetCard.classList.remove('task-card-highlight');
+        void targetCard.offsetWidth; // force reflow
+        targetCard.classList.add('task-card-highlight');
+        targetCard.addEventListener('animationend', () => {
+          targetCard.classList.remove('task-card-highlight');
+        }, { once: true });
       }
     }
   }

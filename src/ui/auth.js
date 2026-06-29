@@ -43,9 +43,7 @@ export const authMethods = {
           const user = db.getUser();
           this.showMainScreen(user);
         } else {
-          if (this.loginErrorMsg) {
-            this.loginErrorMsg.textContent = 'Неверный логин или пароль!';
-          }
+          this.showToast('Неверный логин или пароль!', 'error');
           if (this.loginPasswordInput) {
             this.loginPasswordInput.value = '';
             this.loginPasswordInput.focus();
@@ -68,9 +66,7 @@ export const authMethods = {
           const user = db.getUser();
           this.showMainScreen(user);
         } else {
-          if (this.registerErrorMsg) {
-            this.registerErrorMsg.textContent = 'Профиль с таким логином уже существует!';
-          }
+          this.showToast('Профиль с таким логином уже существует!', 'error');
         }
       });
     }
@@ -92,7 +88,7 @@ export const authMethods = {
       setTimeout(() => {
         activeView.classList.remove('active', 'screen-fade-out');
         performShowView(targetViewEl);
-      }, 250);
+      }, 150);
     } else {
       views.forEach(v => {
         if (v && v !== targetViewEl) {

@@ -72,10 +72,19 @@ export const ui = {
     this.categoryTypeSelect = document.getElementById('category-type');
     this.selectedColorInput = document.getElementById('selected-category-color');
     this.selectedIconInput = document.getElementById('selected-category-icon');
-    this.colorSwatches = document.querySelectorAll('.color-swatch');
-    this.iconSwatches = document.querySelectorAll('.icon-swatch');
+    this.colorSwatches = document.querySelectorAll('#category-form .color-swatch');
+    this.iconSwatches = document.querySelectorAll('#category-form .icon-swatch');
     this.cancelCategoryEditBtn = document.getElementById('cancel-category-edit');
     this.categoryFormTitle = document.getElementById('category-form-title');
+
+    // Теги DOM
+    this.tagForm = document.getElementById('tag-form');
+    this.tagNameInput = document.getElementById('tag-name');
+    this.selectedTagColorInput = document.getElementById('selected-tag-color');
+    this.tagColorSwatches = document.querySelectorAll('#tag-form .color-swatch');
+    this.cancelTagEditBtn = document.getElementById('cancel-tag-edit');
+    this.tagFormTitle = document.getElementById('tag-form-title');
+    this.tagsList = document.getElementById('tags-list');
 
     // Транзакции DOM
     this.txForm = document.getElementById('transaction-form');
@@ -86,6 +95,7 @@ export const ui = {
     this.txDescription = document.getElementById('tx-description');
     this.txType = document.getElementById('tx-type');
     this.txCategory = document.getElementById('tx-category');
+    this.txTagsSelector = document.getElementById('tx-tags-selector');
     this.txAmount = document.getElementById('tx-amount');
     this.txDate = document.getElementById('tx-date');
 
@@ -107,6 +117,7 @@ export const ui = {
     this.planDescription = document.getElementById('plan-description');
     this.planType = document.getElementById('plan-type');
     this.planCategory = document.getElementById('plan-category');
+    this.planTagsSelector = document.getElementById('plan-tags-selector');
     this.planAmount = document.getElementById('plan-amount');
     this.planDate = document.getElementById('plan-date');
     this.planningList = document.getElementById('planning-list');
@@ -116,6 +127,7 @@ export const ui = {
     this.txSearch = document.getElementById('transaction-search');
     this.filterType = document.getElementById('filter-type');
     this.filterCategory = document.getElementById('filter-category');
+    this.filterTag = document.getElementById('filter-tag');
     this.filterDateStart = document.getElementById('filter-date-start');
     this.filterDateEnd = document.getElementById('filter-date-end');
     this.resetFiltersBtn = document.getElementById('reset-filters-btn');
@@ -138,6 +150,19 @@ export const ui = {
     this.overviewBtnToGoals = document.getElementById('overview-btn-to-goals');
     this.overviewBtnToTasks = document.getElementById('overview-btn-to-tasks');
     this.overviewBtnToPlanning = document.getElementById('overview-btn-to-planning');
+
+    // Элементы Аналитики DOM
+    this.analyticsPeriod = document.getElementById('analytics-period');
+    this.analyticsPieChart = document.getElementById('analytics-pie-chart');
+    this.analyticsPieTotal = document.getElementById('analytics-pie-total');
+    this.analyticsPieLegend = document.getElementById('analytics-pie-legend');
+    this.analyticsLineChart = document.getElementById('analytics-line-chart');
+    this.analyticsStatsIncome = document.getElementById('analytics-stats-income');
+    this.analyticsStatsExpense = document.getElementById('analytics-stats-expense');
+    this.analyticsStatsBalance = document.getElementById('analytics-stats-balance');
+    this.analyticsStatsSavings = document.getElementById('analytics-stats-savings');
+    this.analyticsTagsList = document.getElementById('analytics-tags-list');
+    this.analyticsInsightsContainer = document.getElementById('analytics-insights-container');
 
     // Настройки DOM
     this.settingsProfileForm = document.getElementById('settings-profile-form');
@@ -250,15 +275,58 @@ export const ui = {
     this.bindEvents();
     this.initCustomSelects();
     this.initHeaderRain();
+    this.initAlertOverride();
+    this.initGlobalValidationHandler();
 
-    setTimeout(() => {
-      if (user) {
-        this.showMainScreen(user);
-      } else {
-        this.hideLoader();
-        this.showAuthScreen();
-      }
+    setTimeout(async () => {
+      await this.startupUpdateCheckAndLaunch(user);
     }, 800);
+  },
+
+  initAlertOverride() {
+    window.alert = (message) => {
+      if (!message) return;
+      const msgLower = message.toLowerCase();
+      
+      let type = 'info';
+      if (msgLower.includes('ошибка') || msgLower.includes('не ') || msgLower.includes('сначала') || msgLower.includes('пожалуйста') || msgLower.includes('превышать') || msgLower.includes('уже') || msgLower.includes('нельзя')) {
+        type = 'error';
+      } else if (msgLower.includes('успешно') || msgLower.includes('сохранен') || msgLower.includes('изменена') || msgLower.includes('очищен') || msgLower.includes('удален')) {
+        type = 'success';
+      }
+      
+      ui.showToast(message, type);
+    };
+  },
+
+  initGlobalValidationHandler() {
+    document.addEventListener('invalid', (e) => {
+      e.preventDefault();
+      
+      const input = e.target;
+      const validationMsg = input.validationMessage || 'Заполните это поле';
+      
+      let labelText = '';
+      if (input.id) {
+        const label = document.querySelector(`label[for="${input.id}"]`);
+        if (label) {
+          labelText = label.textContent.trim().replace(':', '');
+        }
+      }
+      
+      let displayMessage = '';
+      if (labelText) {
+        displayMessage = `Поле "${labelText}": ${validationMsg.toLowerCase()}`;
+      } else {
+        displayMessage = validationMsg;
+      }
+      
+      if (!this._lastToastTick || Date.now() - this._lastToastTick > 100) {
+        this._lastToastTick = Date.now();
+        ui.showToast(displayMessage, 'error');
+        input.focus();
+      }
+    }, true);
   },
 
   initTitlebar() {
@@ -306,6 +374,31 @@ export const ui = {
           alert("Закрыть окно (в браузере недоступно)");
         });
       }
+    }
+  },
+
+  async startupUpdateCheckAndLaunch(user) {
+    if (window.__TAURI_INTERNALS__) {
+      try {
+        const update = await check();
+        if (update) {
+          const confirmMsg = `Доступно новое обновление!\n\nВерсия: v${update.version}\n\nХотите скачать и установить обновление сейчас? Приложение будет перезапущено автоматически.`;
+          if (await this.showConfirm(confirmMsg)) {
+            this.showToast('Загрузка обновления...', 'info');
+            await update.downloadAndInstall();
+            await relaunch();
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка проверки обновлений при запуске:', error);
+      }
+    }
+
+    if (user) {
+      this.showMainScreen(user);
+    } else {
+      this.showAuthScreen();
     }
   },
 
@@ -371,7 +464,6 @@ export const ui = {
 
     // Анимация появления
     setTimeout(() => {
-      banner.style.transform = 'translateY(0)';
       banner.style.opacity = '1';
     }, 10);
 
@@ -392,7 +484,6 @@ export const ui = {
 
     laterBtn.addEventListener('click', () => {
       // Анимация скрытия
-      banner.style.transform = 'translateY(20px)';
       banner.style.opacity = '0';
       banner.addEventListener('transitionend', () => {
         banner.remove();
@@ -435,10 +526,6 @@ export const ui = {
     // Выход
     if (this.logoutBtn) {
       this.logoutBtn.addEventListener('click', () => {
-        if (this.updateCheckInterval) {
-          clearInterval(this.updateCheckInterval);
-          this.updateCheckInterval = null;
-        }
         db.clearUser();
         this.showAuthScreen();
       });
@@ -471,15 +558,37 @@ export const ui = {
     this.bindFinanceEvents();
     this.bindProductivityEvents();
     this.bindSettingsEvents();
+    this.initInfoHelpTabs();
+  },
+
+  initInfoHelpTabs() {
+    const helpButtons = document.querySelectorAll('.info-help-nav-btn');
+    const helpPanels = document.querySelectorAll('.info-help-content-panel');
+
+    helpButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-help-target');
+        
+        // Deactivate all buttons and panels
+        helpButtons.forEach(b => b.classList.remove('active'));
+        helpPanels.forEach(p => p.classList.remove('active', 'screen-fade-in'));
+        
+        // Activate selected button
+        btn.classList.add('active');
+        
+        // Activate selected panel
+        const targetPanel = document.getElementById(targetId);
+        if (targetPanel) {
+          targetPanel.classList.add('active');
+          this.animateEditorFade(targetPanel);
+        }
+      });
+    });
   },
 
   showAuthScreen() {
     const globalTheme = localStorage.getItem('plant_global_theme') || 'lime';
     this.applyTheme(globalTheme);
-    if (this.updateCheckInterval) {
-      clearInterval(this.updateCheckInterval);
-      this.updateCheckInterval = null;
-    }
     this.updateSidebarSlimState();
     this.resetAuthForms();
     if (this.loader) this.loader.style.display = 'none';
@@ -512,7 +621,7 @@ export const ui = {
       
       const sidebarSlim = document.querySelector('.sidebar-slim');
       if (sidebarSlim) {
-        sidebarSlim.style.animation = 'screenFadeOut 0.3s forwards ease-in-out';
+        sidebarSlim.style.animation = 'screenFadeOut 0.15s forwards ease-in-out';
       }
       
       setTimeout(() => {
@@ -521,7 +630,7 @@ export const ui = {
           sidebarSlim.style.animation = '';
         }
         performShowAuth();
-      }, 300);
+      }, 150);
     } else {
       if (this.authScreen) this.authScreen.classList.remove('active');
       [document.getElementById('about-screen'), document.getElementById('updates-screen'), document.getElementById('profile-screen'), document.getElementById('settings-screen')].forEach(el => {
@@ -583,6 +692,8 @@ export const ui = {
 
     // Отрисовать данные
     this.renderCategories();
+    this.renderTags();
+    this.resetTagForm();
     this.resetTxForm();
     this.renderTransactions();
     this.renderBudgets();
@@ -591,16 +702,9 @@ export const ui = {
     this.renderOverview();
     this.resetGoalForm();
     this.renderSavingsGoals();
+    this.renderAnalytics();
     
     this.switchTab('tab-overview', true);
-    this.checkAppUpdates(false);
-
-    if (this.updateCheckInterval) {
-      clearInterval(this.updateCheckInterval);
-    }
-    this.updateCheckInterval = setInterval(() => {
-      this.checkAppUpdates(false);
-    }, 15 * 60 * 1000);
 
     // Даем браузеру отрисовать изменения за экраном загрузки
     setTimeout(() => {
@@ -630,6 +734,8 @@ export const ui = {
       
       if (tabId === 'tab-overview') {
         this.renderOverview();
+      } else if (tabId === 'tab-analytics') {
+        this.renderAnalytics();
       } else if (tabId === 'tab-budgets') {
         this.renderBudgets();
       } else if (tabId === 'tab-savings-goals') {
@@ -641,6 +747,12 @@ export const ui = {
       } else if (tabId === 'tab-transactions') {
         this.resetTxForm();
         this.renderTransactions();
+      } else if (tabId === 'tab-categories') {
+        this.resetCategoryForm();
+        this.renderCategories();
+      } else if (tabId === 'tab-tags') {
+        this.resetTagForm();
+        this.renderTags();
       } else if (tabId === 'tab-notes') {
         this.resetNoteForm();
         this.renderNotes();
@@ -670,7 +782,7 @@ export const ui = {
           if (targetTab) {
             performShowTab(targetTab);
           }
-        }, 300);
+        }, 150);
       } else {
         const targetTab = Array.from(this.tabContents).find(tab => tab.id === tabId);
         if (targetTab) {
@@ -740,7 +852,7 @@ export const ui = {
         if (targetScreen) {
           performShowScreen(targetScreen);
         }
-      }, 300);
+      }, 150);
     } else {
       if (targetScreen && !targetScreen.classList.contains('active')) {
         performShowScreen(targetScreen);
@@ -769,9 +881,8 @@ export const ui = {
       align-items: center;
       gap: 8px;
       pointer-events: auto;
-      transform: translateY(20px);
       opacity: 0;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      transition: opacity 0.15s ease;
       min-width: 250px;
     `;
 
@@ -785,12 +896,10 @@ export const ui = {
     container.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.transform = 'translateY(0)';
       toast.style.opacity = '1';
     }, 10);
 
     setTimeout(() => {
-      toast.style.transform = 'translateY(20px)';
       toast.style.opacity = '0';
       toast.addEventListener('transitionend', () => {
         toast.remove();

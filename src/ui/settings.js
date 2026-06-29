@@ -209,6 +209,33 @@ export const settingsMethods = {
         }
       });
     });
+
+    // --- ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК НАСТРОЕК (50/50) ---
+    const settingsNavBtns = document.querySelectorAll('.settings-nav-btn');
+    const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+    
+    settingsNavBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTabId = btn.getAttribute('data-settings-tab');
+        if (!targetTabId) return;
+
+        // Переключение активного класса у кнопок
+        settingsNavBtns.forEach(b => {
+          b.classList.remove('active');
+        });
+        btn.classList.add('active');
+
+        // Переключение активного таба с анимацией fade-in
+        settingsTabContents.forEach(tab => {
+          if (tab.id === targetTabId) {
+            tab.classList.add('active');
+            this.animateEditorFade(tab);
+          } else {
+            tab.classList.remove('active');
+          }
+        });
+      });
+    });
   },
 
   // --- ЛОГИКА ПРОФИЛЯ ---

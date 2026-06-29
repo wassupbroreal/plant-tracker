@@ -150,6 +150,10 @@
                 <span class="material-symbols-outlined">public</span>
                 <span>Обзор</span>
               </button>
+              <button type="button" class="nav-item" data-target="tab-analytics">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Аналитика</span>
+              </button>
             </div>
 
             <!-- Группа 2: Финансовые операции -->
@@ -179,6 +183,10 @@
               <button type="button" class="nav-item" data-target="tab-categories">
                 <span class="material-symbols-outlined">sell</span>
                 <span>Категории</span>
+              </button>
+              <button type="button" class="nav-item" data-target="tab-tags">
+                <span class="material-symbols-outlined">label</span>
+                <span>Теги</span>
               </button>
             </div>
 
@@ -284,17 +292,115 @@
                 </div>
               </div>
 
-              <!-- Столбец 4: Планирование -->
-              <div class="overview-column">
-                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
-                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Планирование</span>
-                </div>
-                <div class="column-content" id="overview-planning-list">
-                  <!-- Запланированные платежи рендерятся динамически -->
-                </div>
-              </div>
             </div>
           </section>
+
+          <!-- Вкладка: АНАЛИТИКА (Analytics) -->
+          <section id="tab-analytics" class="tab-content">
+            <div class="content-header">
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">bar_chart</span>
+                <h1>Аналитика</h1>
+              </div>
+              <p class="content-description">Наглядные графики структуры расходов и динамики ваших финансов</p>
+            </div>
+
+            <!-- Блок фильтрации (Filter Panel) -->
+            <div class="filter-panel" style="margin-bottom: 0;">
+              <select id="analytics-period" style="width: 100%;">
+                <option value="current-month">Текущий месяц</option>
+                <option value="current-year">Текущий год</option>
+                <option value="all-time">Все время</option>
+              </select>
+            </div>
+
+            <!-- Карточки суммарных показателей (Stats Summary Row) -->
+            <div class="analytics-stats-row" style="margin-bottom: 0;">
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Доходы</span>
+                <span id="analytics-stats-income" style="font-size: 18px; font-weight: bold; color: var(--color-success);">0.00 ₽</span>
+              </div>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Расходы</span>
+                <span id="analytics-stats-expense" style="font-size: 18px; font-weight: bold; color: var(--color-danger);">0.00 ₽</span>
+              </div>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Баланс</span>
+                <span id="analytics-stats-balance" style="font-size: 18px; font-weight: bold; color: var(--text-primary);">0.00 ₽</span>
+              </div>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Сбережения</span>
+                <span id="analytics-stats-savings" style="font-size: 18px; font-weight: bold; color: var(--color-savings);">0.00 ₽</span>
+              </div>
+            </div>
+
+            <div class="analytics-grid" style="width: 100%;">
+              
+              <!-- Карточка 1: Распределение расходов по категориям -->
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: var(--spacing-card);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>Распределение расходов</h3>
+                </div>
+                
+                <div class="analytics-chart-container" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 16px; flex-grow: 1; min-height: 0; overflow: hidden; height: 100%;">
+                  <!-- SVG диаграмма -->
+                  <div style="position: relative; height: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; flex-shrink: 1; min-height: 0;">
+                    <div id="analytics-pie-chart" style="width: 100%; height: 100%;"></div>
+                    <div style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none;">
+                      <span style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Расходы</span>
+                      <span id="analytics-pie-total" style="font-size: 13px; font-weight: bold; color: var(--text-primary);">0.00 ₽</span>
+                    </div>
+                  </div>
+                  <!-- Легенда к диаграмме -->
+                  <div id="analytics-pie-legend" style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; height: 100%; overflow-y: auto;">
+                    <!-- Заполняется динамически -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Карточка 2: Динамика доходов и расходов -->
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: var(--spacing-card);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>Динамика финансов</h3>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-secondary);">
+                      <span style="width: 10px; height: 10px; border-radius: 2px; background-color: var(--accent-color, #84cc16);"></span> Доходы
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-secondary);">
+                      <span style="width: 10px; height: 10px; border-radius: 2px; background-color: #ef4444;"></span> Расходы
+                    </span>
+                  </div>
+                </div>
+                
+                <div id="analytics-line-chart" style="width: 100%; flex-grow: 1; min-height: 0; display: flex; align-items: center; justify-content: center;">
+                  <!-- SVG линейный график -->
+                </div>
+              </div>
+
+              <!-- Карточка 3: Расходы по тегам -->
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: var(--spacing-card);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>Расходы по тегам</h3>
+                </div>
+                <div id="analytics-tags-list" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; overflow-y: auto; padding-right: 4px; width: 100%;">
+                  <!-- Заполняется динамически -->
+                </div>
+              </div>
+
+              <!-- Карточка 4: Анализ и Закономерности (Инсайты) -->
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: var(--spacing-card);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>Закономерности и инсайты</h3>
+                </div>
+                <div id="analytics-insights-container" style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; overflow-y: auto; font-size: 12px; padding-right: 4px; width: 100%;">
+                  <!-- Заполняется динамически -->
+                </div>
+              </div>
+
+            </div>
+          </section>
+
           <!-- Вкладка: ТРАНЗАКЦИИ (Transactions) -->
           <section id="tab-transactions" class="tab-content">
             <div class="content-header">
@@ -332,6 +438,13 @@
                     <select id="tx-category" required>
                       <!-- Подгружается динамически -->
                     </select>
+                  </div>
+
+                  <div class="input-group" id="tx-tags-group">
+                    <label>Теги</label>
+                    <div class="tx-tags-selector-grid" id="tx-tags-selector">
+                      <!-- Заполняется динамически чипсами -->
+                    </div>
                   </div>
 
                   <div class="input-group" id="tx-goal-group" style="display: none;">
@@ -381,6 +494,9 @@
                     </select>
                     <select id="filter-category">
                       <option value="all">Все категории</option>
+                    </select>
+                    <select id="filter-tag">
+                      <option value="all">Все теги</option>
                     </select>
                     <div class="date-range" style="flex: 2;">
                       <input type="date" id="filter-date-start" placeholder="···" autocomplete="off">
@@ -467,6 +583,10 @@
                       <button type="button" class="icon-swatch" data-icon="sports_esports"><span class="material-symbols-outlined">sports_esports</span></button>
                       <button type="button" class="icon-swatch" data-icon="flight"><span class="material-symbols-outlined">flight</span></button>
                       <button type="button" class="icon-swatch" data-icon="credit_card"><span class="material-symbols-outlined">credit_card</span></button>
+                      <button type="button" class="icon-swatch" data-icon="subscriptions"><span class="material-symbols-outlined">subscriptions</span></button>
+                      <button type="button" class="icon-swatch" data-icon="fitness_center"><span class="material-symbols-outlined">fitness_center</span></button>
+                      <button type="button" class="icon-swatch" data-icon="local_bar"><span class="material-symbols-outlined">local_bar</span></button>
+                      <button type="button" class="icon-swatch" data-icon="spa"><span class="material-symbols-outlined">spa</span></button>
                     </div>
                     <input type="hidden" id="selected-category-icon" value="payments">
                   </div>
@@ -513,6 +633,69 @@
                     </div>
                   </div>
 
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Вкладка: ТЕГИ (Tags) -->
+          <section id="tab-tags" class="tab-content">
+            <div class="content-header">
+              <div class="header-bg-shapes"></div>
+              <div class="header-title-row">
+                <span class="material-symbols-outlined header-icon">label</span>
+                <h1>Теги</h1>
+              </div>
+              <p class="content-description">Управление тегами для дополнительной разметки трат</p>
+            </div>
+
+            <div class="categories-layout">
+              <!-- Левая колонка: Форма добавления/редактирования -->
+              <div class="dashboard-card categories-form-card">
+                <h3 id="tag-form-title">Добавить тег</h3>
+                <form id="tag-form">
+                  <input type="hidden" id="tag-id-edit">
+                  <div class="input-group">
+                    <label for="tag-name">Название</label>
+                    <input type="text" id="tag-name" required placeholder="···" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                  </div>
+                  <div class="input-group">
+                    <label>Цвет</label>
+                    <div class="color-picker-grid">
+                      <button type="button" class="color-swatch active" style="background-color: #ffffff;" data-color="#ffffff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #84cc16;" data-color="#84cc16"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #06b6d4;" data-color="#06b6d4"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #3b82f6;" data-color="#3b82f6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #8b5cf6;" data-color="#8b5cf6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ec4899;" data-color="#ec4899"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ef4444;" data-color="#ef4444"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #f59e0b;" data-color="#f59e0b"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #14b8a6;" data-color="#14b8a6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #91ffc6;" data-color="#91ffc6"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #919cff;" data-color="#919cff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #91e4ff;" data-color="#91e4ff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #b491ff;" data-color="#b491ff"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ff91fd;" data-color="#ff91fd"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ff9191;" data-color="#ff9191"><span class="material-symbols-outlined">check</span></button>
+                      <button type="button" class="color-swatch" style="background-color: #ceff91;" data-color="#ceff91"><span class="material-symbols-outlined">check</span></button>
+                    </div>
+                    <input type="hidden" id="selected-tag-color" value="#ffffff">
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="save-tag-btn">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-tag-edit" style="display: none;">Отмена</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Правая колонка: Списки тегов -->
+              <div class="categories-list-container" style="display: flex; flex-direction: column; gap: var(--spacing-layout); width: 100%;">
+                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; text-align: left; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Все теги</span>
+                </div>
+                <div class="categories-list-columns" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-layout); align-items: start; width: 100%;" id="tags-list">
+                  <!-- Заполняется динамически -->
                 </div>
               </div>
             </div>
@@ -669,6 +852,13 @@
                     <select id="plan-category" required>
                       <!-- Подгружается динамически -->
                     </select>
+                  </div>
+
+                  <div class="input-group" id="plan-tags-group">
+                    <label>Теги</label>
+                    <div class="tx-tags-selector-grid" id="plan-tags-selector">
+                      <!-- Заполняется динамически чипсами -->
+                    </div>
                   </div>
 
                   <div class="input-group">
@@ -903,67 +1093,279 @@
         </main>
       </div>
 
-      <!-- ЭКРАН "О ПРИЛОЖЕНИИ" -->
+      <!-- ЭКРАН "ИНФОРМАЦИЯ" (БЫВШИЙ "О ПРИЛОЖЕНИИ") -->
       <div id="about-screen" class="screen">
-        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: var(--spacing-layout); overflow-y: auto; gap: var(--spacing-layout);">
-          <div class="content-header" style="margin-bottom: 0;">
-            <div class="header-bg-shapes">
-            </div>
+        <div class="info-layout-container">
+          <div class="content-header">
+            <div class="header-bg-shapes"></div>
             <div class="header-title-row">
               <span class="material-symbols-outlined header-icon">info</span>
-              <h1>О приложении</h1>
+              <h1>Информация</h1>
             </div>
             <p class="content-description">Plant — приватный и минималистичный персональный органайзер</p>
           </div>
-          <div class="dashboard-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-              <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent-color);">potted_plant</span>
-              <span style="font-size: 20px; font-weight: 700; letter-spacing: 1px;">Plant</span>
+
+          <div class="info-columns-grid">
+            <!-- Левая колонка: О приложении -->
+            <div class="dashboard-card info-left-panel">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent-color);">potted_plant</span>
+                <span style="font-size: 20px; font-weight: 700; letter-spacing: 1px;">Plant</span>
+              </div>
+              
+              <p style="color: var(--text-secondary); line-height: 1.6; font-size: 13px;">
+                Plant спроектирован как легкий, быстрый и абсолютно конфиденциальный инструмент для организации вашей повседневной жизни, задач и финансов. Все ваши личные данные, списки и транзакции хранятся исключительно локально на вашем устройстве в хранилище LocalStorage. Ни один байт информации не передается на сторонние сервера или в облака.
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+                <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary); font-size: 13px;">
+                    <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 18px;">payments</span>
+                    <span>Финансовый блок</span>
+                  </div>
+                  <p style="color: var(--text-secondary); font-size: 11px; line-height: 1.4;">
+                    Отслеживайте доходы и расходы, планируйте бюджеты по категориям с визуальными лимитами и копите на мечты с модулем «Цели».
+                  </p>
+                </div>
+
+                <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary); font-size: 13px;">
+                    <span class="material-symbols-outlined" style="color: #38bdf8; font-size: 18px;">assignment</span>
+                    <span>Удобный Органайзер</span>
+                  </div>
+                  <p style="color: var(--text-secondary); font-size: 11px; line-height: 1.4;">
+                    Управляйте планами на Kanban-доске задач, ведите важные текстовые заметки и пользуйтесь интерактивными списками покупок и дел.
+                  </p>
+                </div>
+
+                <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary); font-size: 13px;">
+                    <span class="material-symbols-outlined" style="color: var(--color-savings); font-size: 18px;">shield</span>
+                    <span>Полная приватность</span>
+                  </div>
+                  <p style="color: var(--text-secondary); font-size: 11px; line-height: 1.4;">
+                    Абсолютная безопасность и отсутствие отслеживания. Приложение полностью автономно и работает оффлайн на базе Tauri.
+                  </p>
+                </div>
+
+                <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary); font-size: 13px;">
+                    <span class="material-symbols-outlined" style="color: #f59e0b; font-size: 18px;">bolt</span>
+                    <span>Молниеносная скорость</span>
+                  </div>
+                  <p style="color: var(--text-secondary); font-size: 11px; line-height: 1.4;">
+                    Никаких тяжелых фреймворков и библиотек. Приложение написано на чистом Javascript и оптимизировано для максимального быстродействия.
+                  </p>
+                </div>
+              </div>
             </div>
-            
-            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 14px;">
-              Plant спроектирован как легкий, быстрый и абсолютно конфиденциальный инструмент для организации вашей повседневной жизни, задач и финансов. Все ваши личные данные, списки и транзакции хранятся исключительно локально на вашем устройстве в хранилище LocalStorage. Ни один байт информации не передается на сторонние сервера или в облака.
-            </p>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px;">
-              <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary);">
-                  <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 20px;">payments</span>
-                  <span>Финансовый блок</span>
-                </div>
-                <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
-                  Отслеживайте доходы и расходы, планируйте бюджеты по категориям с визуальными лимитами и копите на мечты с модулем «Цели».
-                </p>
+            <!-- Правая колонка: Интерактивная справка и инструкции -->
+            <div class="dashboard-card info-right-panel">
+              <div class="info-help-sidebar">
+                <button type="button" class="info-help-nav-btn active" data-help-target="help-overview">
+                  <span class="material-symbols-outlined">public</span>
+                  <span>Обзор</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-analytics">
+                  <span class="material-symbols-outlined">bar_chart</span>
+                  <span>Аналитика</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-transactions">
+                  <span class="material-symbols-outlined">payments</span>
+                  <span>Транзакции</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-planning">
+                  <span class="material-symbols-outlined">event_upcoming</span>
+                  <span>Планирование</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-budgets">
+                  <span class="material-symbols-outlined">account_balance_wallet</span>
+                  <span>Бюджеты</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-goals">
+                  <span class="material-symbols-outlined">track_changes</span>
+                  <span>Цели</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-cats-tags">
+                  <span class="material-symbols-outlined">sell</span>
+                  <span>Категории и теги</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-organizer">
+                  <span class="material-symbols-outlined">assignment</span>
+                  <span>Органайзер</span>
+                </button>
+                <button type="button" class="info-help-nav-btn" data-help-target="help-settings">
+                  <span class="material-symbols-outlined">settings</span>
+                  <span>Настройки</span>
+                </button>
               </div>
 
-              <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary);">
-                  <span class="material-symbols-outlined" style="color: #38bdf8; font-size: 20px;">assignment</span>
-                  <span>Удобный Органайзер</span>
+              <div class="info-help-content-area">
+                <!-- 1. Обзор -->
+                <div class="info-help-content-panel active" id="help-overview">
+                  <h3><span class="material-symbols-outlined">public</span>Обзор</h3>
+                  <p>Рабочий стол приложения. Объединяет ключевые сводки ваших финансов и личной эффективности, помогая оценить общую картину за день.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Финансовый статус</div>
+                      <div class="info-help-step-desc">Отображает текущий баланс, общие доходы, расходы и отложенные сбережения для быстрого контроля.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Сводные колонки</div>
+                      <div class="info-help-step-desc">Показывает последние денежные транзакции, Kanban-задачи на сегодня, заполненность лимитов бюджетов и ближайшие планируемые платежи.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Быстрая навигация</div>
+                      <div class="info-help-step-desc">Кнопка в верхнем правом углу каждой колонки позволяет мгновенно перейти в соответствующий раздел для детальной работы.</div>
+                    </div>
+                  </div>
                 </div>
-                <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
-                  Управляйте планами на Kanban-доске задач, ведите важные текстовые заметки и пользуйтесь интерактивными списками покупок и дел.
-                </p>
-              </div>
 
-              <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary);">
-                  <span class="material-symbols-outlined" style="color: var(--color-savings); font-size: 20px;">shield</span>
-                  <span>Полная приватность</span>
+                <!-- 2. Аналитика -->
+                <div class="info-help-content-panel" id="help-analytics">
+                  <h3><span class="material-symbols-outlined">bar_chart</span>Аналитика</h3>
+                  <p>Интерактивный центр детального анализа ваших средств. Помогает понять структуру потребления и выявить скрытые закономерности.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Выбор периода</div>
+                      <div class="info-help-step-desc">Фильтруйте статистику за текущий месяц, год или всё время с помощью верхнего выпадающего списка.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Распределение и динамика</div>
+                      <div class="info-help-step-desc">Круговая диаграмма наглядно показывает структуру расходов по категориям. Линейный график отображает тренд доходов и расходов за 6 месяцев.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Теги и инсайты</div>
+                      <div class="info-help-step-desc">Анализируйте траты по тегам и изучайте финансовые инсайты (среднедневной расход, индекс покрытия доходов расходами и крупнейшую покупку).</div>
+                    </div>
+                  </div>
                 </div>
-                <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
-                  Абсолютная безопасность и отсутствие отслеживания. Приложение полностью автономно и работает оффлайн на базе Tauri.
-                </p>
-              </div>
 
-              <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary);">
-                  <span class="material-symbols-outlined" style="color: #f59e0b; font-size: 20px;">bolt</span>
-                  <span>Молниеносная скорость</span>
+                <!-- 3. Транзакции -->
+                <div class="info-help-content-panel" id="help-transactions">
+                  <h3><span class="material-symbols-outlined">payments</span>Транзакции</h3>
+                  <p>Журнал финансовых операций. Служит основным инструментом ввода и редактирования денежных транзакций.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Добавление операции</div>
+                      <div class="info-help-step-desc">Заполните описание, выберите тип (доход/расход/накопление), категорию, сумму и дату. Дополнительно можно отметить теги или привязать операцию к накопительной цели.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Управление историей</div>
+                      <div class="info-help-step-desc">Для редактирования операции нажмите на иконку карандаша на нужной строке, внесите изменения и сохраните. Для удаления используйте иконку корзины.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Поиск и фильтрация</div>
+                      <div class="info-help-step-desc">Быстро находите операции по тексту описания или фильтруйте по типам, категориям, тегам и диапазону дат. Кнопка сброса сбрасывает все фильтры.</div>
+                    </div>
+                  </div>
                 </div>
-                <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
-                  Никаких тяжелых фреймворков и библиотек. Приложение написано на чистом Javascript и оптимизировано для максимального быстродействия.
-                </p>
+
+                <!-- 4. Планирование -->
+                <div class="info-help-content-panel" id="help-planning">
+                  <h3><span class="material-symbols-outlined">event_upcoming</span>Планирование</h3>
+                  <p>Контроль будущих и регулярных расходов. Помогает не забыть про ежемесячные подписки, обязательные платежи или ожидаемые доходы.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Создание плана</div>
+                      <div class="info-help-step-desc">Добавьте планируемый платеж, указав его описание, сумму, дату исполнения и тип операции.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Проведение операции</div>
+                      <div class="info-help-step-desc">При наступлении даты платежа или заранее нажмите кнопку «Провести», чтобы автоматически скопировать этот план в список реальных транзакций.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Бюджеты -->
+                <div class="info-help-content-panel" id="help-budgets">
+                  <h3><span class="material-symbols-outlined">account_balance_wallet</span>Бюджеты</h3>
+                  <p>Эффективный инструмент лимитирования расходов по категориям. Не позволяет тратить лишнее.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Создание лимита</div>
+                      <div class="info-help-step-desc">Выберите категорию расходов и задайте предельную сумму трат на один месяц.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Контроль шкал</div>
+                      <div class="info-help-step-desc">Прогресс-бар наглядно показывает соотношение реальных расходов и лимита. Если лимит превышен, шкала и сумма перерасхода подсвечиваются красным.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. Цели -->
+                <div class="info-help-content-panel" id="help-goals">
+                  <h3><span class="material-symbols-outlined">track_changes</span>Цели накопления</h3>
+                  <p>Инструмент финансового планирования для накопления на крупные покупки, путешествия или подушку безопасности.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Создание цели</div>
+                      <div class="info-help-step-desc">Создайте цель, укажите её название и необходимую сумму для накопления.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Пополнение баланса цели</div>
+                      <div class="info-help-step-desc">При создании транзакции с типом «Накопление» свяжите её с целью в выпадающем списке. Внесенные средства автоматически прибавятся к балансу цели.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. Категории и теги -->
+                <div class="info-help-content-panel" id="help-cats-tags">
+                  <h3><span class="material-symbols-outlined">sell</span>Категории и теги</h3>
+                  <p>Управление классификаторами ваших записей. Позволяет тонко настроить структуру расходов и доходов под себя.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Категории</div>
+                      <div class="info-help-step-desc">Создавайте и редактируйте категории доходов, расходов и сбережений, подбирая для каждой уникальный цвет и иконку из сетки выбора.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Теги</div>
+                      <div class="info-help-step-desc">Создавайте неограниченное число тегов. Теги позволяют группировать разнородные транзакции по событиям (например: отпуск, подарки, доставка).</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 8. Органайзер -->
+                <div class="info-help-content-panel" id="help-organizer">
+                  <h3><span class="material-symbols-outlined">assignment</span>Органайзер</h3>
+                  <p>Мощные инструменты для управления делами и фиксации мыслей: Заметки, Чек-листы и Kanban-доска задач.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Заметки</div>
+                      <div class="info-help-step-desc">Создавайте текстовые документы, ведите дневники или записывайте идеи. Редактор автоматически сохраняет все вводимые тексты локально.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Чек-листы</div>
+                      <div class="info-help-step-desc">Составляйте списки покупок, чек-листы подготовки к поездкам или списки дел. Вычеркивайте завершенные пункты кликом мыши.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Задачи (Kanban)</div>
+                      <div class="info-help-step-desc">Управляйте делами на Kanban-доске. Создавайте карточки задач и перетаскивайте их между тремя колонками: «План», «В работе» и «Готово».</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 9. Настройки -->
+                <div class="info-help-content-panel" id="help-settings">
+                  <h3><span class="material-symbols-outlined">settings</span>Настройки</h3>
+                  <p>Конфигурация параметров безопасности, локальной валюты и резервного копирования данных.</p>
+                  <div class="info-help-step-list">
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Безопасность профиля</div>
+                      <div class="info-help-step-desc">Задайте PIN-код для входа в ваш профиль, чтобы ограничить доступ посторонних лиц при запуске приложения.</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Экспорт и импорт (Резервные копии)</div>
+                      <div class="info-help-step-desc">Сохраняйте все финансовые и органайзер-данные в файл JSON на диск (экспорт) и восстанавливайте из него данные в любой момент (импорт).</div>
+                    </div>
+                    <div class="info-help-step-item">
+                      <div class="info-help-step-title">Опасная зона</div>
+                      <div class="info-help-step-desc">Возможность сбросить все транзакции и записи без удаления профиля, либо безвозвратно удалить сам профиль со всеми данными.</div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -1004,7 +1406,7 @@
               <div style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span class="material-symbols-outlined" style="color: var(--accent-color); font-size: 20px;">system_update_alt</span>
-                  <span style="font-weight: 500; font-size: 14px;">Автоматические обновления</span>
+                  <span style="font-weight: 500; font-size: 14px;">Автоматическая проверка при запуске</span>
                 </div>
                 <span style="font-size: 12px; color: var(--text-secondary);">Текущая версия: v0.5.0</span>
               </div>
@@ -1050,7 +1452,7 @@
                 <span style="font-size: 11px; color: var(--text-secondary);">Предыдущая</span>
               </div>
               <ul style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
-                <li>Добавлена трехвкладочная навигация прямо в Titlebar (Главная, О приложении, Обновление) с плавными fade-переходами.</li>
+                <li>Добавлена трехвкладочная навигация прямо в Titlebar (Главная, Информация, Обновление) с плавными fade-переходами.</li>
                 <li>Кастомизированы кнопки управления окном: теперь они содержат аккуратные надписи «Свернуть», «Развернуть» и «Закрыть» для максимального удобства.</li>
                 <li>Оптимизирована зона перетаскивания (Tauri drag region), сохраняющая нативное поведение окна за пределами интерактивных вкладок.</li>
               </ul>
@@ -1132,122 +1534,166 @@
             <p class="content-description">Параметры интерфейса, выбор валюты и резервное копирование</p>
           </div>
           
-          <div class="settings-list-container" style="width: 100%; display: flex; flex-direction: column; gap: var(--spacing-layout);">
-            <!-- Карточка Цветовой Темы -->
-            <div class="dashboard-card">
-              <h3 style="margin-bottom: 16px;">Цветовая тема</h3>
-              <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
-                Выберите основной акцентный цвет интерфейса приложения PLANT.
-              </p>
-              <div class="theme-picker-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="theme-swatch" data-theme="white" style="background-color: #ffffff;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="lime" style="background-color: #84cc16;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="cyan" style="background-color: #06b6d4;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="blue" style="background-color: #3b82f6;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="purple" style="background-color: #8b5cf6;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="pink" style="background-color: #ec4899;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="red" style="background-color: #ef4444;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="orange" style="background-color: #f59e0b;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="teal" style="background-color: #14b8a6;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="mint" style="background-color: #91ffc6;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="lavender" style="background-color: #919cff;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="sky" style="background-color: #91e4ff;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="lilac" style="background-color: #b491ff;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="blossom" style="background-color: #ff91fd;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="coral" style="background-color: #ff9191;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-                <button class="theme-swatch" data-theme="pastel-lime" style="background-color: #ceff91;">
-                  <span class="material-symbols-outlined">check</span>
-                </button>
-              </div>
+          <div class="settings-layout">
+            <!-- Левая колонка: Кнопки навигации -->
+            <div class="settings-nav-sidebar">
+              <button class="settings-nav-btn active" data-settings-tab="settings-tab-general">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Общие настройки</span>
+              </button>
+              <button class="settings-nav-btn" data-settings-tab="settings-tab-personalization">
+                <span class="material-symbols-outlined">palette</span>
+                <span>Персонализация</span>
+              </button>
+              <button class="settings-nav-btn" data-settings-tab="settings-tab-backup">
+                <span class="material-symbols-outlined">backup</span>
+                <span>Резервное копирование</span>
+              </button>
+              <button class="settings-nav-btn" data-settings-tab="settings-tab-danger">
+                <span class="material-symbols-outlined">warning</span>
+                <span>Опасная зона</span>
+              </button>
             </div>
 
-            <!-- Карточка Валюты -->
-            <div class="dashboard-card">
-              <h3 style="margin-bottom: 16px;">Валюта приложения</h3>
-              <form id="settings-currency-form" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                <div class="input-group" style="margin-bottom: 0;">
-                  <label for="settings-currency">Выберите валюту</label>
-                  <select id="settings-currency" required>
-                    <option value="RUB">Rub (₽) — Рубль</option>
-                    <option value="USD">Usd ($) — Доллар</option>
-                    <option value="EUR">Eur (€) — Евро</option>
-                    <option value="GBP">Gbp (£) — Фунт</option>
-                    <option value="BYN">Byn (Br) — Белорусский рубль</option>
-                    <option value="KZT">Kzt (₸) — Тенге</option>
-                    <option value="UAH">Uah (₴) — Гривна</option>
-                  </select>
+            <!-- Правая колонка: Содержимое вкладок -->
+            <div class="settings-tab-container">
+              <!-- Общие настройки -->
+              <div id="settings-tab-general" class="settings-tab-content active">
+                <!-- Карточка Валюты -->
+                <div class="dashboard-card" style="width: 100%;">
+                  <h3 style="margin-bottom: 16px;">Валюта приложения</h3>
+                  <form id="settings-currency-form" class="settings-form">
+                    <div class="input-group">
+                      <label for="settings-currency">Выберите валюту</label>
+                      <select id="settings-currency" required>
+                        <option value="RUB">Rub (₽) — Рубль</option>
+                        <option value="USD">Usd ($) — Доллар</option>
+                        <option value="EUR">Eur (€) — Евро</option>
+                        <option value="GBP">Gbp (£) — Фунт</option>
+                        <option value="BYN">Byn (Br) — Белорусский рубль</option>
+                        <option value="KZT">Kzt (₸) — Тенге</option>
+                        <option value="UAH">Uah (₴) — Гривна</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                      <span>Применить валюту</span>
+                    </button>
+                  </form>
                 </div>
-                <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
-                  <span>Применить валюту</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- Карточка Резервного копирования -->
-            <div class="dashboard-card">
-              <h3 style="margin-bottom: 16px;">Резервное копирование</h3>
-              <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
-                Вы можете экспортировать все транзакции, категории, бюджеты и планы в один JSON-файл для бэкапа или переноса на другое устройство.
-              </p>
-              
-              <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <button type="button" id="settings-export-btn" class="btn btn-primary">
-                  <span>Экспорт в json</span>
-                </button>
-                
-                <button class="btn btn-primary" id="import-trigger-btn" type="button">
-                  <span>Импорт из json</span>
-                </button>
-                <input type="file" id="settings-import-file" accept=".json" style="display: none;">
               </div>
-            </div>
 
-            <!-- Карточка Опасной зоны -->
-            <div class="dashboard-card" style="border-color: var(--color-danger);">
-              <h3 style="color: var(--color-danger); margin-bottom: 16px;">Опасная зона</h3>
-              <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
-                Сброс данных или удаление профиля приведет к безвозвратному удалению информации. Данные в LocalStorage будут полностью очищены.
-              </p>
-              
-              <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <button type="button" id="settings-reset-btn" class="btn btn-danger">
-                  <span>Сбросить все данные</span>
-                </button>
-                
-                <button type="button" id="btn-delete-profile" class="btn btn-danger" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                  <span>Удалить профиль со всеми данными</span>
-                  <span class="material-symbols-outlined" style="font-size: 18px;">delete_forever</span>
-                </button>
+              <!-- Персонализация -->
+              <div id="settings-tab-personalization" class="settings-tab-content">
+                <!-- Карточка Цветовой Темы -->
+                <div class="dashboard-card" style="width: 100%;">
+                  <h3 style="margin-bottom: 16px;">Цветовая тема</h3>
+                  <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
+                    Выберите основной акцентный цвет интерфейса приложения PLANT.
+                  </p>
+                  <div class="theme-picker-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="theme-swatch" data-theme="white" style="background-color: #ffffff;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="lime" style="background-color: #84cc16;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="cyan" style="background-color: #06b6d4;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="blue" style="background-color: #3b82f6;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="purple" style="background-color: #8b5cf6;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="pink" style="background-color: #ec4899;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="red" style="background-color: #ef4444;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="orange" style="background-color: #f59e0b;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="teal" style="background-color: #14b8a6;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="mint" style="background-color: #91ffc6;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="lavender" style="background-color: #919cff;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="sky" style="background-color: #91e4ff;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="lilac" style="background-color: #b491ff;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="blossom" style="background-color: #ff91fd;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="coral" style="background-color: #ff9191;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <button class="theme-swatch" data-theme="pastel-lime" style="background-color: #ceff91;">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Резервное копирование -->
+              <div id="settings-tab-backup" class="settings-tab-content">
+                <!-- Карточка Резервного копирования -->
+                <div class="dashboard-card" style="width: 100%;">
+                  <h3 style="margin-bottom: 16px;">Резервное копирование</h3>
+                  <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
+                    Вы можете экспортировать все транзакции, категории, бюджеты и планы в один JSON-файл для бэкапа или переноса на другое устройство.
+                  </p>
+                  
+                  <div class="settings-action-row">
+                    <button type="button" id="settings-export-btn" class="btn btn-primary">
+                      <span>Экспорт в json</span>
+                    </button>
+                    
+                    <button class="btn btn-primary" id="import-trigger-btn" type="button">
+                      <span>Импорт из json</span>
+                    </button>
+                    <input type="file" id="settings-import-file" accept=".json" style="display: none;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Опасная зона -->
+              <div id="settings-tab-danger" class="settings-tab-content">
+                <!-- Карточка Сброса Данных -->
+                <div class="dashboard-card" style="border-color: var(--color-danger); width: 100%;">
+                  <h3 style="color: var(--color-danger); margin-bottom: 16px;">Сброс данных</h3>
+                  <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
+                    Сброс данных приведет к безвозвратному удалению всей финансовой информации профиля. Данные в LocalStorage будут полностью очищены.
+                  </p>
+                  
+                  <div class="settings-action-row">
+                    <button type="button" id="settings-reset-btn" class="btn btn-danger">
+                      <span>Сбросить все данные</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Карточка Удаления Профиля -->
+                <div class="dashboard-card" style="border-color: var(--color-danger); width: 100%;">
+                  <h3 style="color: var(--color-danger); margin-bottom: 16px;">Удаление профиля</h3>
+                  <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; line-height: 1.6;">
+                    Удаление профиля со всеми данными безвозвратно сотрет ваш аккаунт и связанные с ним настройки и транзакции на этом устройстве.
+                  </p>
+                  
+                  <div class="settings-action-row">
+                    <button type="button" id="btn-delete-profile" class="btn btn-danger">
+                      <span>Удалить профиль со всеми данными</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

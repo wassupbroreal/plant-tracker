@@ -9,7 +9,8 @@ const DB_KEYS = {
   NOTES: 'plant_notes',
   CHECKLISTS: 'plant_checklists',
   TASKS: 'plant_tasks',
-  GOALS: 'plant_goals'
+  GOALS: 'plant_goals',
+  TAGS: 'plant_tags'
 };
 
 const DEFAULT_CATEGORIES = [
@@ -57,7 +58,8 @@ export const db = {
       NOTES: [],
       CHECKLISTS: [],
       TASKS: [],
-      GOALS: []
+      GOALS: [],
+      TAGS: []
     };
 
     Object.entries(keys).forEach(([keyName, defaultValue]) => {
@@ -135,7 +137,8 @@ export const db = {
       `plant_${profileId}_notes`,
       `plant_${profileId}_checklists`,
       `plant_${profileId}_tasks`,
-      `plant_${profileId}_goals`
+      `plant_${profileId}_goals`,
+      `plant_${profileId}_tags`
     ];
     keysToRemove.forEach(k => localStorage.removeItem(k));
 
@@ -498,6 +501,43 @@ export const db = {
     this.saveGoals(goals);
   },
 
+  // --- ТЕГИ ---
+  getTags() {
+    return JSON.parse(localStorage.getItem(this.getKey('TAGS'))) || [];
+  },
+
+  saveTags(tags) {
+    localStorage.setItem(this.getKey('TAGS'), JSON.stringify(tags));
+  },
+
+  addTag(tag) {
+    const tags = this.getTags();
+    const newTag = {
+      id: 'tag-' + this.generateId(),
+      ...tag
+    };
+    tags.push(newTag);
+    this.saveTags(tags);
+    return newTag;
+  },
+
+  updateTag(id, updatedFields) {
+    const tags = this.getTags();
+    const index = tags.findIndex(t => t.id === id);
+    if (index !== -1) {
+      tags[index] = { ...tags[index], ...updatedFields };
+      this.saveTags(tags);
+      return tags[index];
+    }
+    return null;
+  },
+
+  deleteTag(id) {
+    let tags = this.getTags();
+    tags = tags.filter(t => t.id !== id);
+    this.saveTags(tags);
+  },
+
   // --- СБРОС ВСЕХ ДАННЫХ ПРОФИЛЯ ---
   resetAll() {
     const activeId = this.getActiveProfileId();
@@ -511,6 +551,7 @@ export const db = {
       localStorage.removeItem(`plant_${activeId}_checklists`);
       localStorage.removeItem(`plant_${activeId}_tasks`);
       localStorage.removeItem(`plant_${activeId}_goals`);
+      localStorage.removeItem(`plant_${activeId}_tags`);
 
       let profiles = this.getProfiles();
       profiles = profiles.filter(p => p.id !== activeId);

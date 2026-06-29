@@ -19,6 +19,47 @@ export const financeMethods = {
       });
     });
 
+    // --- ТЕГИ ---
+    if (this.tagColorSwatches) {
+      this.tagColorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          this.tagColorSwatches.forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          this.selectedTagColorInput.value = swatch.getAttribute('data-color');
+        });
+      });
+    }
+
+    if (this.tagForm) {
+      this.tagForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('tag-id-edit').value;
+        const name = this.formatSentenceCase(this.tagNameInput.value.trim());
+        const color = this.selectedTagColorInput.value;
+
+        let newTag;
+        if (id) {
+          db.updateTag(id, { name, color });
+          newTag = { id };
+        } else {
+          newTag = db.addTag({ name, color });
+        }
+
+        this.resetTagForm();
+        this.renderTags(newTag ? newTag.id : null);
+        this.populateTxModalTags();
+        this.populatePlanModalTags();
+        this.populateFilterTags(db.getTags());
+        this.renderTransactions();
+      });
+    }
+
+    if (this.cancelTagEditBtn) {
+      this.cancelTagEditBtn.addEventListener('click', () => {
+        this.resetTagForm();
+      });
+    }
+
     if (this.categoryForm) {
       this.categoryForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -75,10 +116,12 @@ export const financeMethods = {
         }
 
         let newTxId = null;
+        const activeChips = this.txTagsSelector ? this.txTagsSelector.querySelectorAll('.tx-tag-choice-chip.active') : [];
+        const tagIds = Array.from(activeChips).map(chip => chip.getAttribute('data-tag-id'));
         if (id) {
-          db.updateTransaction(id, { description, type, categoryId, amount, date, goalId });
+          db.updateTransaction(id, { description, type, categoryId, tagIds, tagId: '', amount, date, goalId });
         } else {
-          const newTx = db.addTransaction({ description, type, categoryId, amount, date, goalId });
+          const newTx = db.addTransaction({ description, type, categoryId, tagIds, tagId: '', amount, date, goalId });
           newTxId = newTx.id;
         }
 
@@ -159,11 +202,14 @@ export const financeMethods = {
           return;
         }
 
+        const activeChips = this.planTagsSelector ? this.planTagsSelector.querySelectorAll('.tx-tag-choice-chip.active') : [];
+        const tagIds = Array.from(activeChips).map(chip => chip.getAttribute('data-tag-id'));
+
         let newPlanId = null;
         if (id) {
-          db.updatePlan(id, { description, type, categoryId, amount, date });
+          db.updatePlan(id, { description, type, categoryId, tagIds, tagId: '', amount, date });
         } else {
-          const newPlan = db.addPlan({ description, type, categoryId, amount, date, status: 'pending' });
+          const newPlan = db.addPlan({ description, type, categoryId, tagIds, tagId: '', amount, date, status: 'pending' });
           newPlanId = newPlan.id;
         }
 
@@ -179,7 +225,7 @@ export const financeMethods = {
     }
 
     // --- ФИЛЬТРЫ ---
-    const filterElements = [this.txSearch, this.filterType, this.filterCategory, this.filterDateStart, this.filterDateEnd];
+    const filterElements = [this.txSearch, this.filterType, this.filterCategory, this.filterTag, this.filterDateStart, this.filterDateEnd];
     filterElements.forEach(element => {
       if (element) {
         element.addEventListener('input', () => this.renderTransactions());
@@ -192,6 +238,7 @@ export const financeMethods = {
         if (this.txSearch) this.txSearch.value = '';
         if (this.filterType) this.filterType.value = 'all';
         if (this.filterCategory) this.filterCategory.value = 'all';
+        if (this.filterTag) this.filterTag.value = 'all';
         if (this.filterDateStart) this.filterDateStart.value = '';
         if (this.filterDateEnd) this.filterDateEnd.value = '';
         this.renderTransactions();
@@ -251,6 +298,21 @@ export const financeMethods = {
         this.resetGoalForm();
       });
     }
+
+    if (this.analyticsPeriod) {
+      this.analyticsPeriod.addEventListener('change', () => {
+        this.renderAnalytics();
+      });
+    }
+
+    // Закрытие контекстных меню категорий и тегов при клике вне их
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.category-menu-wrapper')) {
+        document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+      }
+    });
   },
 
   // --- ХЕЛПЕРЫ ВАЛЮТЫ ---
@@ -371,9 +433,20 @@ export const financeMethods = {
             <span class="material-symbols-outlined">${cat.icon}</span>
             <span>${this.formatSentenceCase(cat.name)}</span>
           </div>
-          <div class="budget-card-actions">
-            <button class="category-action-btn edit"><span class="material-symbols-outlined">edit</span></button>
-            <button class="category-action-btn delete"><span class="material-symbols-outlined">delete</span></button>
+          <div class="category-menu-wrapper">
+            <button class="category-action-btn menu-trigger" type="button">
+              <span class="material-symbols-outlined">more_vert</span>
+            </button>
+            <div class="category-context-menu">
+              <div class="custom-option edit-opt">
+                <span class="material-symbols-outlined">edit</span>
+                <span>Редактировать</span>
+              </div>
+              <div class="custom-option delete-opt" style="color: var(--color-danger);">
+                <span class="material-symbols-outlined">delete</span>
+                <span>Удалить</span>
+              </div>
+            </div>
           </div>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; margin-bottom: 6px;">
@@ -386,11 +459,29 @@ export const financeMethods = {
         </div>
       `;
 
-      card.querySelector('.edit').addEventListener('click', () => {
+      const wrapper = card.querySelector('.category-menu-wrapper');
+      const trigger = card.querySelector('.menu-trigger');
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.contains('open');
+        document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+        if (!isOpen) {
+          wrapper.classList.add('open');
+        }
+      });
+
+      card.querySelector('.edit-opt').addEventListener('click', (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         this.editBudget(bgt);
       });
 
-      card.querySelector('.delete').addEventListener('click', async () => {
+      card.querySelector('.delete-opt').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         if (await this.showConfirm(`Удалить бюджет для категории "${this.formatSentenceCase(cat.name)}"?`)) {
           db.deleteBudget(bgt.id);
           this.renderBudgets();
@@ -422,7 +513,6 @@ export const financeMethods = {
     if (this.cancelBudgetEditBtn) this.cancelBudgetEditBtn.style.display = 'none';
   },
 
-  // --- ЛОГИКА ПЛАНИРОВАНИЯ ---
   editPlan(plan) {
     this.planIdEdit.value = plan.id;
     this.planDescription.value = plan.description;
@@ -430,6 +520,9 @@ export const financeMethods = {
     this.populatePlanModalCategories(plan.categoryId);
     this.planAmount.value = plan.amount;
     this.planDate.value = plan.date;
+
+    const tagIds = plan.tagIds || (plan.tagId ? [plan.tagId] : []);
+    this.populatePlanModalTags(tagIds);
 
     this.planningFormTitle.textContent = 'Редактировать платёж';
     if (this.cancelPlanEditBtn) this.cancelPlanEditBtn.style.display = 'inline-flex';
@@ -440,6 +533,7 @@ export const financeMethods = {
     if (this.planningForm) this.planningForm.reset();
     this.planDate.value = new Date().toISOString().substring(0, 10);
     this.populatePlanModalCategories();
+    this.populatePlanModalTags([]);
     this.planningFormTitle.textContent = 'Запланировать платёж';
     if (this.cancelPlanEditBtn) this.cancelPlanEditBtn.style.display = 'none';
   },
@@ -469,6 +563,7 @@ export const financeMethods = {
   renderPlanning(highlightId = null) {
     const plans = db.getPlans().filter(p => p.status !== 'paid');
     const categories = db.getCategories();
+    const tags = db.getTags();
     if (!this.planningList) return;
     this.planningList.innerHTML = '';
 
@@ -517,26 +612,53 @@ export const financeMethods = {
           const borderStyle = isLastRow ? '' : 'border-bottom: 1px solid var(--border-color); padding-bottom: 12px;';
           const marginTopStyle = index === 0 ? '' : 'margin-top: 4px;';
 
+          const planTagsList = plan.tagIds || (plan.tagId ? [plan.tagId] : []);
+          const planTags = planTagsList.map(id => tags.find(tg => tg.id === id)).filter(Boolean);
+          const tagsBadgesHtml = planTags.map(tag => `
+            <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35; font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 10px;">label</span>${this.formatSentenceCase(tag.name)}
+            </span>
+          `).join('');
+
+          const statusBadgeHtml = statusLabel !== 'Ожидает' ? `
+            <span class="status-badge ${statusClass}" style="font-size: 11px; padding: 2px 6px; flex-shrink: 0; margin-left: 4px;">${this.formatSentenceCase(statusLabel)}</span>
+          ` : '';
+
           rowsHtml += `
             <div class="planning-row-item" data-id="${plan.id}" style="display: flex; justify-content: space-between; align-items: center; ${borderStyle} ${marginTopStyle}">
               <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; margin-right: 16px;">
                 <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-main); flex-shrink: 0;">${formattedDate}</span>
-                <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 4px;">
                   ${this.formatSentenceCase(this.escapeHtml(plan.description))}
                 </span>
-                <span class="status-badge ${statusClass}" style="font-size: 11px; padding: 2px 6px; flex-shrink: 0; margin-left: 4px;">${this.formatSentenceCase(statusLabel)}</span>
+                ${tagsBadgesHtml}
+                ${statusBadgeHtml}
               </div>
               
               <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
                 <span class="tx-amount ${typeClass}" style="font-size: 14px; font-weight: 500;">
                   ${this.formatAmount(plan.amount, false, amountSign)}
                 </span>
-                <div class="budget-card-actions" style="display: flex; gap: 8px;">
-                  ${plan.status !== 'paid' ? `
-                    <button class="category-action-btn pay-btn"><span class="material-symbols-outlined">check</span></button>
-                  ` : ''}
-                  <button class="category-action-btn edit"><span class="material-symbols-outlined">edit</span></button>
-                  <button class="category-action-btn delete"><span class="material-symbols-outlined">delete</span></button>
+                <div class="category-menu-wrapper">
+                  <button class="category-action-btn menu-trigger" type="button">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="category-context-menu">
+                    ${plan.status !== 'paid' ? `
+                      <div class="custom-option pay-opt" style="color: var(--color-success);">
+                        <span class="material-symbols-outlined">check</span>
+                        <span>Провести</span>
+                      </div>
+                    ` : ''}
+                    <div class="custom-option edit-opt">
+                      <span class="material-symbols-outlined">edit</span>
+                      <span>Редактировать</span>
+                    </div>
+                    <div class="custom-option delete-opt" style="color: var(--color-danger);">
+                      <span class="material-symbols-outlined">delete</span>
+                      <span>Удалить</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -548,18 +670,40 @@ export const financeMethods = {
         datePlans.forEach(plan => {
           const rowEl = card.querySelector(`[data-id="${plan.id}"]`);
           if (rowEl) {
-            const payBtn = rowEl.querySelector('.pay-btn');
-            if (payBtn) {
-              payBtn.addEventListener('click', async () => {
+            const wrapper = rowEl.querySelector('.category-menu-wrapper');
+            const trigger = rowEl.querySelector('.menu-trigger');
+
+            if (trigger && wrapper) {
+              trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = wrapper.classList.contains('open');
+                document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+                  w.classList.remove('open');
+                });
+                if (!isOpen) {
+                  wrapper.classList.add('open');
+                }
+              });
+            }
+
+            const payOpt = rowEl.querySelector('.pay-opt');
+            if (payOpt) {
+              payOpt.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                wrapper.classList.remove('open');
                 await this.payPlannedPayment(plan);
               });
             }
 
-            rowEl.querySelector('.edit').addEventListener('click', () => {
+            rowEl.querySelector('.edit-opt').addEventListener('click', (e) => {
+              e.stopPropagation();
+              wrapper.classList.remove('open');
               this.editPlan(plan);
             });
 
-            rowEl.querySelector('.delete').addEventListener('click', async () => {
+            rowEl.querySelector('.delete-opt').addEventListener('click', async (e) => {
+              e.stopPropagation();
+              wrapper.classList.remove('open');
               if (await this.showConfirm(`Удалить запланированный платёж "${this.formatSentenceCase(plan.description)}"?`)) {
                 db.deletePlan(plan.id);
                 this.renderPlanning();
@@ -584,6 +728,8 @@ export const financeMethods = {
         description: this.formatSentenceCase(`Оплата: ${plan.description}`),
         type: plan.type,
         categoryId: plan.categoryId,
+        tagIds: plan.tagIds || (plan.tagId ? [plan.tagId] : []),
+        tagId: '',
         amount: plan.amount,
         date: today
       });
@@ -632,17 +778,46 @@ export const financeMethods = {
           <span class="material-symbols-outlined">${cat.icon}</span>
           <span style="font-weight: 500;">${this.formatSentenceCase(cat.name)}</span>
         </div>
-        <div class="category-chip-actions">
-          <button class="category-action-btn edit"><span class="material-symbols-outlined">edit</span></button>
-          <button class="category-action-btn delete"><span class="material-symbols-outlined">delete</span></button>
+        <div class="category-menu-wrapper">
+          <button class="category-action-btn menu-trigger" type="button">
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+          <div class="category-context-menu">
+            <div class="custom-option edit-opt">
+              <span class="material-symbols-outlined">edit</span>
+              <span>Редактировать</span>
+            </div>
+            <div class="custom-option delete-opt" style="color: var(--color-danger);">
+              <span class="material-symbols-outlined">delete</span>
+              <span>Удалить</span>
+            </div>
+          </div>
         </div>
       `;
 
-      chip.querySelector('.edit').addEventListener('click', () => {
+      const wrapper = chip.querySelector('.category-menu-wrapper');
+      const trigger = chip.querySelector('.menu-trigger');
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.contains('open');
+        document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+        if (!isOpen) {
+          wrapper.classList.add('open');
+        }
+      });
+
+      chip.querySelector('.edit-opt').addEventListener('click', (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         this.editCategory(cat);
       });
 
-      chip.querySelector('.delete').addEventListener('click', async () => {
+      chip.querySelector('.delete-opt').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         const txs = db.getTransactions();
         const hasLinkedTxs = txs.some(t => t.categoryId === cat.id);
         if (hasLinkedTxs) {
@@ -746,6 +921,8 @@ export const financeMethods = {
       if (this.cancelTxEditBtn) this.cancelTxEditBtn.style.display = 'inline-flex';
       
       this.populateTxModalCategories(tx.categoryId);
+      const tagIds = tx.tagIds || (tx.tagId ? [tx.tagId] : []);
+      this.populateTxModalTags(tagIds);
       this.toggleTxGoalGroup(tx.goalId || null);
     }
   },
@@ -760,6 +937,7 @@ export const financeMethods = {
     if (this.cancelTxEditBtn) this.cancelTxEditBtn.style.display = 'none';
     
     this.populateTxModalCategories();
+    this.populateTxModalTags([]);
     this.toggleTxGoalGroup();
   },
 
@@ -785,9 +963,25 @@ export const financeMethods = {
     }
   },
 
+  populateTxModalTags(selectedId = null) {
+    if (!this.txTag) return;
+    const tags = db.getTags();
+
+    this.txTag.innerHTML = '<option value="">Без тега</option>';
+    tags.forEach(tag => {
+      const opt = document.createElement('option');
+      opt.value = tag.id;
+      opt.textContent = this.formatSentenceCase(tag.name);
+      this.txTag.appendChild(opt);
+    });
+    if (selectedId) this.txTag.value = selectedId;
+    else this.txTag.value = '';
+  },
+
   renderTransactions(highlightId = null) {
     const transactions = db.getTransactions();
     const categories = db.getCategories();
+    const tags = db.getTags();
     const listBody = document.getElementById('transactions-list');
     const emptyState = document.getElementById('transactions-empty-state');
 
@@ -797,6 +991,7 @@ export const financeMethods = {
     const searchVal = this.txSearch ? this.txSearch.value.trim().toLowerCase() : '';
     const typeVal = this.filterType ? this.filterType.value : 'all';
     const catVal = this.filterCategory ? this.filterCategory.value : 'all';
+    const tagVal = this.filterTag ? this.filterTag.value : 'all';
     const dateStartVal = this.filterDateStart ? this.filterDateStart.value : '';
     const dateEndVal = this.filterDateEnd ? this.filterDateEnd.value : '';
 
@@ -804,6 +999,10 @@ export const financeMethods = {
       if (searchVal && !t.description.toLowerCase().includes(searchVal)) return false;
       if (typeVal !== 'all' && t.type !== typeVal) return false;
       if (catVal !== 'all' && t.categoryId !== catVal) return false;
+      if (tagVal !== 'all') {
+        const txTagsList = t.tagIds || (t.tagId ? [t.tagId] : []);
+        if (!txTagsList.includes(tagVal)) return false;
+      }
       if (dateStartVal && t.date < dateStartVal) return false;
       if (dateEndVal && t.date > dateEndVal) return false;
       return true;
@@ -825,6 +1024,8 @@ export const financeMethods = {
       
       filtered.forEach(t => {
         const cat = categories.find(c => c.id === t.categoryId);
+        const txTagsList = t.tagIds || (t.tagId ? [t.tagId] : []);
+        const txTags = txTagsList.map(id => tags.find(tg => tg.id === id)).filter(Boolean);
         const card = document.createElement('div');
         card.className = 'budget-card';
         
@@ -841,16 +1042,34 @@ export const financeMethods = {
           amountSign = '';
         }
 
+        const tagsBadgesHtml = txTags.map(tag => `
+          <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">
+            <span class="material-symbols-outlined" style="font-size: 10px;">label</span>${this.formatSentenceCase(tag.name)}
+          </span>
+        `).join('');
+
         card.innerHTML = `
           <div class="budget-card-header">
-            <div class="budget-card-title" style="color: ${cat ? cat.color : 'var(--text-muted)'};">
+            <div class="budget-card-title" style="color: ${cat ? cat.color : 'var(--text-muted)'}; flex-wrap: wrap;">
               <span class="material-symbols-outlined">${cat ? cat.icon : 'help_outline'}</span>
               <span>${cat ? this.formatSentenceCase(cat.name) : 'Без категории'}</span>
+              ${tagsBadgesHtml}
               <span style="font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 8px;">${t.date.split('-').reverse().join('.')}</span>
             </div>
-            <div class="budget-card-actions">
-              <button class="category-action-btn edit"><span class="material-symbols-outlined">edit</span></button>
-              <button class="category-action-btn delete"><span class="material-symbols-outlined">delete</span></button>
+            <div class="category-menu-wrapper">
+              <button class="category-action-btn menu-trigger" type="button">
+                <span class="material-symbols-outlined">more_vert</span>
+              </button>
+              <div class="category-context-menu">
+                <div class="custom-option edit-opt">
+                  <span class="material-symbols-outlined">edit</span>
+                  <span>Редактировать</span>
+                </div>
+                <div class="custom-option delete-opt" style="color: var(--color-danger);">
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>Удалить</span>
+                </div>
+              </div>
             </div>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
@@ -863,11 +1082,29 @@ export const financeMethods = {
           </div>
         `;
 
-        card.querySelector('.edit').addEventListener('click', () => {
+        const wrapper = card.querySelector('.category-menu-wrapper');
+        const trigger = card.querySelector('.menu-trigger');
+
+        trigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = wrapper.classList.contains('open');
+          document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+            w.classList.remove('open');
+          });
+          if (!isOpen) {
+            wrapper.classList.add('open');
+          }
+        });
+
+        card.querySelector('.edit-opt').addEventListener('click', (e) => {
+          e.stopPropagation();
+          wrapper.classList.remove('open');
           this.editTransaction(t);
         });
 
-        card.querySelector('.delete').addEventListener('click', async () => {
+        card.querySelector('.delete-opt').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          wrapper.classList.remove('open');
           if (await this.showConfirm(`Удалить транзакцию "${this.formatSentenceCase(t.description)}"?`)) {
             db.deleteTransaction(t.id);
             this.renderTransactions();
@@ -958,9 +1195,20 @@ export const financeMethods = {
             <span class="material-symbols-outlined">track_changes</span>
             <span>${this.formatSentenceCase(this.escapeHtml(goal.title))}</span>
           </div>
-          <div class="budget-card-actions">
-            <button class="category-action-btn edit"><span class="material-symbols-outlined">edit</span></button>
-            <button class="category-action-btn delete"><span class="material-symbols-outlined">delete</span></button>
+          <div class="category-menu-wrapper">
+            <button class="category-action-btn menu-trigger" type="button">
+              <span class="material-symbols-outlined">more_vert</span>
+            </button>
+            <div class="category-context-menu">
+              <div class="custom-option edit-opt">
+                <span class="material-symbols-outlined">edit</span>
+                <span>Редактировать</span>
+              </div>
+              <div class="custom-option delete-opt" style="color: var(--color-danger);">
+                <span class="material-symbols-outlined">delete</span>
+                <span>Удалить</span>
+              </div>
+            </div>
           </div>
         </div>
         ${goal.description ? `<div style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; margin-bottom: 4px;">${this.formatSentenceCase(this.escapeHtml(goal.description))}</div>` : ''}
@@ -974,11 +1222,29 @@ export const financeMethods = {
         </div>
       `;
 
-      card.querySelector('.edit').addEventListener('click', () => {
+      const wrapper = card.querySelector('.category-menu-wrapper');
+      const trigger = card.querySelector('.menu-trigger');
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.contains('open');
+        document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+        if (!isOpen) {
+          wrapper.classList.add('open');
+        }
+      });
+
+      card.querySelector('.edit-opt').addEventListener('click', (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         this.editGoal(goal);
       });
 
-      card.querySelector('.delete').addEventListener('click', async () => {
+      card.querySelector('.delete-opt').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
         if (await this.showConfirm(`Удалить цель "${this.formatSentenceCase(goal.title)}"?`)) {
           db.deleteGoal(goal.id);
           this.renderSavingsGoals();
@@ -1012,5 +1278,777 @@ export const financeMethods = {
     const saveBtn = document.getElementById('save-goal-btn');
     if (saveBtn) saveBtn.textContent = 'Создать';
     if (this.cancelGoalEditBtn) this.cancelGoalEditBtn.style.display = 'none';
+  },
+
+  // --- ЛОГИКА ТЕГОВ ---
+  renderTags(highlightId = null) {
+    if (!this.tagsList) return;
+    const tags = db.getTags();
+    this.tagsList.innerHTML = '';
+
+    if (tags.length === 0) {
+      this.tagsList.innerHTML = '<div class="empty-state" style="grid-column: 1 / span 3;">Нет созданных тегов. Добавьте тег слева.</div>';
+      return;
+    }
+
+    tags.forEach(tag => {
+      if (highlightId && tag.id === highlightId) {
+        this.animateBlock(this.tagsList);
+      }
+
+      const chip = document.createElement('div');
+      chip.className = 'budget-card';
+      chip.style.flexDirection = 'row';
+      chip.style.justifyContent = 'space-between';
+      chip.style.alignItems = 'center';
+      chip.style.padding = '8px 12px';
+      chip.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; color: ${tag.color};">
+          <span class="material-symbols-outlined">label</span>
+          <span style="font-weight: 500;">${this.formatSentenceCase(tag.name)}</span>
+        </div>
+        <div class="category-menu-wrapper">
+          <button class="category-action-btn menu-trigger" type="button">
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+          <div class="category-context-menu">
+            <div class="custom-option edit-opt">
+              <span class="material-symbols-outlined">edit</span>
+              <span>Редактировать</span>
+            </div>
+            <div class="custom-option delete-opt" style="color: var(--color-danger);">
+              <span class="material-symbols-outlined">delete</span>
+              <span>Удалить</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const wrapper = chip.querySelector('.category-menu-wrapper');
+      const trigger = chip.querySelector('.menu-trigger');
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.contains('open');
+        document.querySelectorAll('.category-menu-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+        if (!isOpen) {
+          wrapper.classList.add('open');
+        }
+      });
+
+      chip.querySelector('.edit-opt').addEventListener('click', (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
+        this.editTag(tag);
+      });
+
+      chip.querySelector('.delete-opt').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        wrapper.classList.remove('open');
+        const txs = db.getTransactions();
+        const hasLinkedTxs = txs.some(t => (t.tagIds || (t.tagId ? [t.tagId] : [])).includes(tag.id));
+        if (hasLinkedTxs) {
+          alert(`Нельзя удалить тег "${tag.name}", так как он используется в транзациях!`);
+          return;
+        }
+        if (await this.showConfirm(`Удалить тег "${tag.name}"?`)) {
+          db.deleteTag(tag.id);
+          this.renderTags();
+          this.populateTxModalTags();
+          const currentTags = db.getTags();
+          this.populateFilterTags(currentTags);
+          this.renderTransactions();
+        }
+      });
+
+      this.tagsList.appendChild(chip);
+    });
+
+    this.populateFilterTags(tags);
+  },
+
+  editTag(tag) {
+    document.getElementById('tag-id-edit').value = tag.id;
+    this.tagNameInput.value = tag.name;
+    this.selectedTagColorInput.value = tag.color;
+
+    this.tagColorSwatches.forEach(sw => {
+      if (sw.getAttribute('data-color') === tag.color) {
+        sw.classList.add('active');
+      } else {
+        sw.classList.remove('active');
+      }
+    });
+
+    this.tagFormTitle.textContent = 'Редактировать тег';
+    if (this.cancelTagEditBtn) this.cancelTagEditBtn.style.display = 'inline-flex';
+  },
+
+  resetTagForm() {
+    const editIdInput = document.getElementById('tag-id-edit');
+    if (editIdInput) editIdInput.value = '';
+    if (this.tagForm) this.tagForm.reset();
+    
+    this.tagColorSwatches.forEach((sw, idx) => {
+      if (idx === 0) {
+        sw.classList.add('active');
+        this.selectedTagColorInput.value = sw.getAttribute('data-color');
+      } else {
+        sw.classList.remove('active');
+      }
+    });
+
+    this.tagFormTitle.textContent = 'Добавить тег';
+    if (this.cancelTagEditBtn) this.cancelTagEditBtn.style.display = 'none';
+  },
+
+  populateTxModalTags(selectedIds = []) {
+    if (!this.txTagsSelector) return;
+    const tags = db.getTags();
+
+    this.txTagsSelector.innerHTML = '';
+    if (tags.length === 0) {
+      this.txTagsSelector.innerHTML = '<div class="empty-state" style="font-size: 12px; padding: 4px 0;">Нет созданных тегов</div>';
+      return;
+    }
+
+    tags.forEach(tag => {
+      const chip = document.createElement('div');
+      chip.className = 'tx-tag-choice-chip';
+      chip.setAttribute('data-tag-id', tag.id);
+      
+      const isActive = selectedIds.includes(tag.id);
+      if (isActive) {
+        chip.classList.add('active');
+      }
+
+      chip.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 14px; color: ${tag.color};">label</span>
+        <span>${this.formatSentenceCase(tag.name)}</span>
+      `;
+
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+      });
+
+      this.txTagsSelector.appendChild(chip);
+    });
+  },
+
+  populatePlanModalTags(selectedIds = []) {
+    if (!this.planTagsSelector) return;
+    const tags = db.getTags();
+
+    this.planTagsSelector.innerHTML = '';
+    if (tags.length === 0) {
+      this.planTagsSelector.innerHTML = '<div class="empty-state" style="font-size: 12px; padding: 4px 0;">Нет созданных тегов</div>';
+      return;
+    }
+
+    tags.forEach(tag => {
+      const chip = document.createElement('div');
+      chip.className = 'tx-tag-choice-chip';
+      chip.setAttribute('data-tag-id', tag.id);
+      
+      const isActive = selectedIds.includes(tag.id);
+      if (isActive) {
+        chip.classList.add('active');
+      }
+
+      chip.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 14px; color: ${tag.color};">label</span>
+        <span>${this.formatSentenceCase(tag.name)}</span>
+      `;
+
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+      });
+
+      this.planTagsSelector.appendChild(chip);
+    });
+  },
+
+  populateFilterTags(tags) {
+    if (this.filterTag) {
+      const currentValue = this.filterTag.value;
+      this.filterTag.innerHTML = '<option value="all">Все теги</option>';
+      tags.forEach(tag => {
+        const opt = document.createElement('option');
+        opt.value = tag.id;
+        opt.textContent = this.formatSentenceCase(tag.name);
+        this.filterTag.appendChild(opt);
+      });
+      this.filterTag.value = currentValue;
+    }
+  },
+
+  // --- ЛОГИКА АНАЛИТИКИ ---
+  renderAnalytics() {
+    const transactions = db.getTransactions();
+    const period = this.analyticsPeriod ? this.analyticsPeriod.value : 'current-month';
+
+    const today = new Date();
+    const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const currentYear = `${today.getFullYear()}`;
+
+    const filteredTxs = transactions.filter(t => {
+      if (period === 'current-month') {
+        return t.date.startsWith(currentYearMonth);
+      } else if (period === 'current-year') {
+        return t.date.startsWith(currentYear);
+      }
+      return true;
+    });
+
+    this.renderAnalyticsStats(filteredTxs);
+    this.renderAnalyticsPie(filteredTxs);
+    this.renderAnalyticsTags(filteredTxs);
+    this.renderAnalyticsInsights(filteredTxs, period);
+    this.renderAnalyticsLine();
+  },
+
+  renderAnalyticsStats(filteredTxs) {
+    if (!this.analyticsStatsIncome || !this.analyticsStatsExpense || !this.analyticsStatsBalance || !this.analyticsStatsSavings) return;
+
+    let income = 0;
+    let expense = 0;
+    let savings = 0;
+
+    filteredTxs.forEach(t => {
+      if (t.type === 'income') {
+        income += t.amount;
+      } else if (t.type === 'expense') {
+        expense += t.amount;
+      } else if (t.type === 'savings') {
+        savings += t.amount;
+      }
+    });
+
+    const balance = income - expense;
+
+    this.analyticsStatsIncome.textContent = this.formatAmount(income);
+    this.analyticsStatsExpense.textContent = this.formatAmount(expense);
+    this.analyticsStatsSavings.textContent = this.formatAmount(savings);
+
+    this.analyticsStatsBalance.textContent = this.formatAmount(balance, true);
+    if (balance > 0) {
+      this.analyticsStatsBalance.style.color = 'var(--color-success)';
+    } else if (balance < 0) {
+      this.analyticsStatsBalance.style.color = 'var(--color-danger)';
+    } else {
+      this.analyticsStatsBalance.style.color = 'var(--text-primary)';
+    }
+  },
+
+  renderAnalyticsPie(filteredTxs) {
+    if (!this.analyticsPieChart || !this.analyticsPieTotal || !this.analyticsPieLegend) return;
+    
+    const categories = db.getCategories();
+    
+    // Фильтруем только расходы
+    const expenses = filteredTxs.filter(t => t.type === 'expense');
+    
+    const total = expenses.reduce((sum, t) => sum + t.amount, 0);
+    this.analyticsPieTotal.textContent = this.formatAmount(total);
+    
+    this.analyticsPieChart.innerHTML = '';
+    this.analyticsPieLegend.innerHTML = '';
+    
+    if (total === 0) {
+      this.analyticsPieChart.innerHTML = `
+        <svg viewBox="-1.1 -1.1 2.2 2.2" style="transform: rotate(-90deg); width: 100%; height: 100%;">
+          <circle cx="0" cy="0" r="0.9" fill="none" stroke="var(--border-color)" stroke-width="0.2" />
+        </svg>
+      `;
+      this.analyticsPieLegend.innerHTML = '<div class="empty-state" style="font-size: 13px; color: var(--text-muted); text-align: left; padding: 12px 0;">Нет расходов за выбранный период.</div>';
+      return;
+    }
+    
+    // Группируем по категории
+    const categorySums = {};
+    expenses.forEach(t => {
+      categorySums[t.categoryId] = (categorySums[t.categoryId] || 0) + t.amount;
+    });
+    
+    // Сортируем по убыванию суммы
+    const sortedCategories = Object.entries(categorySums)
+      .map(([catId, amount]) => {
+        const cat = categories.find(c => c.id === catId) || { name: 'Без категории', color: 'var(--text-muted)', icon: 'help_outline' };
+        return {
+          catId,
+          amount,
+          percent: amount / total,
+          name: cat.name,
+          color: cat.color,
+          icon: cat.icon
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+      
+    // Рисуем круговую диаграмму (donut chart)
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '-1.1 -1.1 2.2 2.2');
+    svg.setAttribute('style', 'transform: rotate(-90deg); width: 100%; height: 100%;');
+    
+    const R = 0.9;
+    const C = 2 * Math.PI * R; // 5.6548
+    let cumulativePercent = 0;
+    
+    sortedCategories.forEach(item => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '0');
+      circle.setAttribute('cy', '0');
+      circle.setAttribute('r', String(R));
+      circle.setAttribute('fill', 'none');
+      circle.setAttribute('stroke', item.color);
+      circle.setAttribute('stroke-width', '0.2');
+      circle.setAttribute('stroke-dasharray', `${item.percent * C} ${C}`);
+      circle.setAttribute('stroke-dashoffset', `${-cumulativePercent * C}`);
+      
+      // Подсказка при наведении
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = `${this.formatSentenceCase(item.name)}: ${this.formatAmount(item.amount)} (${(item.percent * 100).toFixed(0)}%)`;
+      circle.appendChild(title);
+      
+      svg.appendChild(circle);
+      cumulativePercent += item.percent;
+    });
+    
+    this.analyticsPieChart.appendChild(svg);
+    
+    // Рисуем легенду
+    sortedCategories.forEach(item => {
+      const legendItem = document.createElement('div');
+      legendItem.className = 'analytics-legend-item';
+      legendItem.style.display = 'flex';
+      legendItem.style.alignItems = 'center';
+      legendItem.style.gap = '8px';
+      legendItem.style.width = '100%';
+      
+      legendItem.innerHTML = `
+        <span style="width: 10px; height: 10px; border-radius: 2px; background-color: ${item.color}; flex-shrink: 0;"></span>
+        <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-secondary); flex-shrink: 0;">${item.icon}</span>
+        <span style="font-size: 12px; font-weight: 500; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex-grow: 1;">
+          ${this.formatSentenceCase(item.name)}
+        </span>
+        <span style="font-size: 12px; color: var(--text-muted); flex-shrink: 0;">
+          ${this.formatAmount(item.amount)} (${(item.percent * 100).toFixed(0)}%)
+        </span>
+      `;
+      
+      this.analyticsPieLegend.appendChild(legendItem);
+    });
+  },
+
+  renderAnalyticsTags(filteredTxs) {
+    if (!this.analyticsTagsList) return;
+    this.analyticsTagsList.innerHTML = '';
+    
+    const tags = db.getTags();
+    const expenses = filteredTxs.filter(t => t.type === 'expense');
+    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+
+    const tagSums = {};
+    expenses.forEach(t => {
+      const txTagsList = t.tagIds || (t.tagId ? [t.tagId] : []);
+      txTagsList.forEach(tagId => {
+        tagSums[tagId] = (tagSums[tagId] || 0) + t.amount;
+      });
+    });
+
+    const sortedTags = Object.entries(tagSums)
+      .map(([tagId, amount]) => {
+        const tag = tags.find(tg => tg.id === tagId) || { name: 'Без тега', color: 'var(--text-muted)' };
+        return {
+          tagId,
+          amount,
+          name: tag.name,
+          color: tag.color
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+
+    if (sortedTags.length === 0) {
+      this.analyticsTagsList.innerHTML = '<div class="empty-state" style="font-size: 13px; color: var(--text-muted); text-align: left; padding: 12px 0;">Нет расходов с тегами за выбранный период.</div>';
+      return;
+    }
+
+    sortedTags.forEach(item => {
+      const percent = totalExpense > 0 ? (item.amount / totalExpense * 100) : 0;
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.flexDirection = 'column';
+      row.style.gap = '6px';
+      row.style.width = '100%';
+      
+      row.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${item.color};"></span>
+            ${this.formatSentenceCase(item.name)}
+          </span>
+          <span style="color: var(--text-secondary); font-weight: 500;">
+            ${this.formatAmount(item.amount)} <span style="color: var(--text-muted); font-size: 11px;">(${percent.toFixed(0)}%)</span>
+          </span>
+        </div>
+        <div style="height: 6px; background-color: var(--bg-input); border-radius: 3px; overflow: hidden; width: 100%;">
+          <div style="height: 100%; width: ${percent}%; background-color: ${item.color}; border-radius: 3px; transition: width var(--transition-fast);"></div>
+        </div>
+      `;
+      this.analyticsTagsList.appendChild(row);
+    });
+  },
+
+  renderAnalyticsInsights(filteredTxs, period) {
+    if (!this.analyticsInsightsContainer) return;
+    this.analyticsInsightsContainer.innerHTML = '';
+
+    const expenses = filteredTxs.filter(t => t.type === 'expense');
+    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+    const totalIncome = filteredTxs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+
+    // 1. Вычисляем количество дней
+    const today = new Date();
+    let days = 30; 
+    let periodText = 'за последние 30 дней';
+
+    if (period === 'current-month') {
+      days = today.getDate();
+      if (days < 1) days = 1;
+      periodText = 'в текущем месяце';
+    } else if (period === 'current-year') {
+      const startOfYear = new Date(today.getFullYear(), 0, 1);
+      const diffTime = Math.abs(today - startOfYear);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      days = diffDays || 1;
+      periodText = 'в текущем году';
+    } else {
+      if (filteredTxs.length > 0) {
+        const dates = filteredTxs.map(t => new Date(t.date)).filter(d => !isNaN(d));
+        if (dates.length > 0) {
+          const minDate = new Date(Math.min(...dates));
+          const diffTime = Math.abs(today - minDate);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          days = diffDays || 1;
+        }
+      }
+      periodText = 'за всё время';
+    }
+
+    const dailyAvg = totalExpense / days;
+
+    // 2. Крупнейшая трата
+    let largestExpense = null;
+    expenses.forEach(t => {
+      if (!largestExpense || t.amount > largestExpense.amount) {
+        largestExpense = t;
+      }
+    });
+
+    const formatDateStr = (dateStr) => {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
+      return dateStr;
+    };
+
+    // 3. Коэффициент покрытия
+    const ratioPercent = totalIncome > 0 ? (totalExpense / totalIncome * 100) : 0;
+    let ratioComment = '';
+    if (totalIncome === 0) {
+      ratioComment = 'Нет доходов за период для сравнения.';
+    } else if (ratioPercent < 50) {
+      ratioComment = 'Превосходно! Вы тратите менее половины своих доходов.';
+    } else if (ratioPercent <= 80) {
+      ratioComment = 'Хорошо. Ваши расходы находятся под контролем.';
+    } else if (ratioPercent <= 100) {
+      ratioComment = 'Внимание! Вы тратите почти все заработанные средства.';
+    } else {
+      ratioComment = 'Осторожно! Расходы превышают ваши доходы.';
+    }
+
+    // 4. Активность операций
+    const totalCount = filteredTxs.length;
+    const incomeCount = filteredTxs.filter(t => t.type === 'income').length;
+    const expenseCount = expenses.length;
+    const savingsCount = filteredTxs.filter(t => t.type === 'savings').length;
+
+    // Сборка верстки инсайтов
+    this.analyticsInsightsContainer.innerHTML = `
+      <div class="analytics-insight-item">
+        <span class="material-symbols-outlined">today</span>
+        <div class="analytics-insight-content">
+          <div class="analytics-insight-title">Среднедневной расход</div>
+          <div class="analytics-insight-value">${this.formatAmount(dailyAvg)} в день</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Рассчитано за ${days} дн. ${periodText}</div>
+        </div>
+      </div>
+
+      <div class="analytics-insight-item">
+        <span class="material-symbols-outlined">local_mall</span>
+        <div class="analytics-insight-content">
+          <div class="analytics-insight-title">Наибольшая трата</div>
+          <div class="analytics-insight-value">
+            ${largestExpense ? `${this.formatSentenceCase(largestExpense.description)} (${this.formatAmount(largestExpense.amount)})` : 'Нет операций'}
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            ${largestExpense ? `Дата покупки: ${formatDateStr(largestExpense.date)}` : 'Добавьте расходы за выбранный период'}
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-insight-item" style="width: 100%;">
+        <span class="material-symbols-outlined">balance</span>
+        <div class="analytics-insight-content" style="width: 100%;">
+          <div class="analytics-insight-title">Индекс покрытия</div>
+          <div class="analytics-insight-value">${ratioPercent.toFixed(0)}% от ваших доходов</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.3;">${ratioComment}</div>
+          ${totalIncome > 0 ? `
+          <div style="height: 4px; background-color: var(--bg-input); border-radius: 2px; overflow: hidden; margin-top: 6px; width: 100%;">
+            <div style="height: 100%; width: ${Math.min(ratioPercent, 100)}%; background-color: ${ratioPercent > 100 ? 'var(--color-danger)' : 'var(--accent-color)'}; border-radius: 2px;"></div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  },
+
+  renderAnalyticsLine() {
+    if (!this.analyticsLineChart) return;
+    this.analyticsLineChart.innerHTML = '';
+    
+    const transactions = db.getTransactions();
+    
+    // Генерируем последние 6 месяцев
+    const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+    const today = new Date();
+    const monthsData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const label = monthNames[month];
+      const yearMonthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+      
+      monthsData.push({
+        label,
+        yearMonthStr,
+        income: 0,
+        expense: 0
+      });
+    }
+    
+    // Суммируем транзакции по месяцам
+    transactions.forEach(t => {
+      const tMonthStr = t.date.substring(0, 7); // "YYYY-MM"
+      const monthObj = monthsData.find(m => m.yearMonthStr === tMonthStr);
+      if (monthObj) {
+        if (t.type === 'income') {
+          monthObj.income += t.amount;
+        } else if (t.type === 'expense') {
+          monthObj.expense += t.amount;
+        }
+      }
+    });
+    
+    // Параметры SVG
+    const width = 500;
+    const height = 240;
+    const paddingLeft = 50;
+    const paddingRight = 20;
+    const paddingTop = 20;
+    const paddingBottom = 30;
+    
+    const plotWidth = width - paddingLeft - paddingRight;
+    const plotHeight = height - paddingTop - paddingBottom;
+    
+    // Ищем максимум для масштабирования
+    let maxVal = 0;
+    monthsData.forEach(m => {
+      if (m.income > maxVal) maxVal = m.income;
+      if (m.expense > maxVal) maxVal = m.expense;
+    });
+    
+    if (maxVal === 0) {
+      maxVal = 1000;
+    }
+    
+    // Округляем maxVal для красивых подписей
+    const order = Math.pow(10, Math.floor(Math.log10(maxVal)));
+    const roundedMax = Math.ceil(maxVal / (order / 2)) * (order / 2);
+    maxVal = roundedMax || maxVal;
+    
+    // Начинаем строить SVG
+    const svgNamespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNamespace, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('style', 'width: 100%; height: 100%; font-family: var(--font-main); overflow: visible;');
+    
+    // Градиенты для заливки под линиями
+    const defs = document.createElementNS(svgNamespace, 'defs');
+    
+    const incomeGrad = document.createElementNS(svgNamespace, 'linearGradient');
+    incomeGrad.setAttribute('id', 'income-area-grad');
+    incomeGrad.setAttribute('x1', '0');
+    incomeGrad.setAttribute('y1', '0');
+    incomeGrad.setAttribute('x2', '0');
+    incomeGrad.setAttribute('y2', '1');
+    
+    incomeGrad.innerHTML = `
+      <stop offset="0%" stop-color="var(--accent-color, #84cc16)" stop-opacity="0.25"></stop>
+      <stop offset="100%" stop-color="var(--accent-color, #84cc16)" stop-opacity="0.00"></stop>
+    `;
+    defs.appendChild(incomeGrad);
+    
+    const expenseGrad = document.createElementNS(svgNamespace, 'linearGradient');
+    expenseGrad.setAttribute('id', 'expense-area-grad');
+    expenseGrad.setAttribute('x1', '0');
+    expenseGrad.setAttribute('y1', '0');
+    expenseGrad.setAttribute('x2', '0');
+    expenseGrad.setAttribute('y2', '1');
+    
+    expenseGrad.innerHTML = `
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.25"></stop>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.00"></stop>
+    `;
+    defs.appendChild(expenseGrad);
+    svg.appendChild(defs);
+    
+    // Отрисовка горизонтальной сетки
+    const gridLines = 4;
+    for (let g = 0; g < gridLines; g++) {
+      const val = (maxVal / (gridLines - 1)) * g;
+      const y = height - paddingBottom - (val / maxVal) * plotHeight;
+      
+      // Линия сетки
+      const line = document.createElementNS(svgNamespace, 'line');
+      line.setAttribute('x1', String(paddingLeft));
+      line.setAttribute('y1', String(y));
+      line.setAttribute('x2', String(width - paddingRight));
+      line.setAttribute('y2', String(y));
+      line.setAttribute('stroke', 'var(--border-color)');
+      line.setAttribute('stroke-dasharray', '4 4');
+      line.setAttribute('opacity', '0.3');
+      svg.appendChild(line);
+      
+      // Подпись Y
+      const text = document.createElementNS(svgNamespace, 'text');
+      text.setAttribute('x', String(paddingLeft - 8));
+      text.setAttribute('y', String(y + 3));
+      text.setAttribute('font-size', '9');
+      text.setAttribute('fill', 'var(--text-muted)');
+      text.setAttribute('text-anchor', 'end');
+      
+      let formattedVal = val.toFixed(0);
+      if (val >= 1000000) {
+        formattedVal = (val / 1000000).toFixed(1) + 'M';
+      } else if (val >= 1000) {
+        formattedVal = (val / 1000).toFixed(0) + 'k';
+      }
+      text.textContent = formattedVal;
+      svg.appendChild(text);
+    }
+    
+    // Вычисляем координаты точек
+    const pointsIncome = [];
+    const pointsExpense = [];
+    
+    monthsData.forEach((m, idx) => {
+      const x = paddingLeft + (idx / (monthsData.length - 1)) * plotWidth;
+      const yInc = height - paddingBottom - (m.income / maxVal) * plotHeight;
+      const yExp = height - paddingBottom - (m.expense / maxVal) * plotHeight;
+      
+      pointsIncome.push({ x, y: yInc, val: m.income, label: m.label });
+      pointsExpense.push({ x, y: yExp, val: m.expense, label: m.label });
+      
+      // Подпись X
+      const text = document.createElementNS(svgNamespace, 'text');
+      text.setAttribute('x', String(x));
+      text.setAttribute('y', String(height - paddingBottom + 18));
+      text.setAttribute('font-size', '10');
+      text.setAttribute('fill', 'var(--text-muted)');
+      text.setAttribute('text-anchor', 'middle');
+      text.textContent = m.label;
+      svg.appendChild(text);
+    });
+    
+    const buildPathData = (points) => points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const buildAreaPathData = (points) => {
+      if (points.length === 0) return '';
+      const linePath = buildPathData(points);
+      const first = points[0];
+      const last = points[points.length - 1];
+      const bottomY = height - paddingBottom;
+      return `${linePath} L ${last.x} ${bottomY} L ${first.x} ${bottomY} Z`;
+    };
+    
+    // --- Доходы ---
+    if (pointsIncome.length > 0) {
+      const area = document.createElementNS(svgNamespace, 'path');
+      area.setAttribute('d', buildAreaPathData(pointsIncome));
+      area.setAttribute('fill', 'url(#income-area-grad)');
+      svg.appendChild(area);
+      
+      const path = document.createElementNS(svgNamespace, 'path');
+      path.setAttribute('d', buildPathData(pointsIncome));
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', 'var(--accent-color, #84cc16)');
+      path.setAttribute('stroke-width', '2');
+      svg.appendChild(path);
+      
+      pointsIncome.forEach(p => {
+        const c = document.createElementNS(svgNamespace, 'circle');
+        c.setAttribute('cx', String(p.x));
+        c.setAttribute('cy', String(p.y));
+        c.setAttribute('r', '4');
+        c.setAttribute('fill', 'var(--accent-color, #84cc16)');
+        c.setAttribute('stroke', 'var(--bg-panel)');
+        c.setAttribute('stroke-width', '1.5');
+        
+        const title = document.createElementNS(svgNamespace, 'title');
+        title.textContent = `Доход (${p.label}): ${this.formatAmount(p.val)}`;
+        c.appendChild(title);
+        
+        svg.appendChild(c);
+      });
+    }
+    
+    // --- Расходы ---
+    if (pointsExpense.length > 0) {
+      const area = document.createElementNS(svgNamespace, 'path');
+      area.setAttribute('d', buildAreaPathData(pointsExpense));
+      area.setAttribute('fill', 'url(#expense-area-grad)');
+      svg.appendChild(area);
+      
+      const path = document.createElementNS(svgNamespace, 'path');
+      path.setAttribute('d', buildPathData(pointsExpense));
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', '#ef4444');
+      path.setAttribute('stroke-width', '2');
+      svg.appendChild(path);
+      
+      pointsExpense.forEach(p => {
+        const c = document.createElementNS(svgNamespace, 'circle');
+        c.setAttribute('cx', String(p.x));
+        c.setAttribute('cy', String(p.y));
+        c.setAttribute('r', '4');
+        c.setAttribute('fill', '#ef4444');
+        c.setAttribute('stroke', 'var(--bg-panel)');
+        c.setAttribute('stroke-width', '1.5');
+        
+        const title = document.createElementNS(svgNamespace, 'title');
+        title.textContent = `Расход (${p.label}): ${this.formatAmount(p.val)}`;
+        c.appendChild(title);
+        
+        svg.appendChild(c);
+      });
+    }
+    
+    this.analyticsLineChart.appendChild(svg);
   }
 };

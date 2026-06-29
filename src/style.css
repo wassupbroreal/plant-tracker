@@ -176,10 +176,10 @@ button, input, select, textarea {
 
 /* Эффекты перехода экранов */
 .screen-fade-out {
-  animation: screenFadeOut 0.3s forwards ease-in-out;
+  animation: screenFadeOut 0.15s forwards ease-in-out;
 }
 .screen-fade-in {
-  animation: screenFadeIn 0.3s forwards ease-in-out;
+  animation: screenFadeIn 0.15s forwards ease-in-out;
 }
 
 @keyframes screenFadeOut {
@@ -541,14 +541,12 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 #profile-pin-input::placeholder {
   opacity: 0.5;
   letter-spacing: 4px;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  transform: translateY(0);
+  transition: opacity var(--transition-fast) ease;
   text-align: center;
 }
 
 #profile-pin-input:focus::placeholder {
   opacity: 0;
-  transform: translateY(-2px);
 }
 
 #profile-pin-input:not(:placeholder-shown) {
@@ -584,7 +582,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 .modal-overlay.active .modal-box {
-  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalSlideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalFadeIn {
@@ -593,8 +591,8 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 }
 
 @keyframes modalSlideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-box {
@@ -693,7 +691,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  animation: screenFadeIn 0.3s forwards ease-in-out;
+  animation: screenFadeIn 0.15s forwards ease-in-out;
 }
 
 .sidebar-top-group {
@@ -733,7 +731,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   height: 0;
   margin-bottom: 0;
   overflow: hidden;
-  transition: opacity 0.3s ease 0s, height 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, margin-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, visibility 0s 0.6s;
+  transition: opacity 0.15s ease 0s, height 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0s, margin-bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0s, visibility 0s 0.15s;
 }
 
 .sidebar-slim .sidebar-profile-btn-slim.titlebar-tab.show {
@@ -741,7 +739,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   visibility: visible;
   height: 44px;
   margin-bottom: 12px; /* Имитируем gap 12px для сдвига нижних кнопок */
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0s, margin-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0s, opacity 0.3s ease 0.3s, visibility 0s 0s;
+  transition: height 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0s, margin-bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1) 0s, opacity 0.15s ease 0s, visibility 0s 0s;
 }
 
 .sidebar-tabs-slim {
@@ -1016,7 +1014,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 .header-icon {
   font-size: 26px;
   color: var(--accent-color);
-  transition: color 0.3s ease;
+  transition: color var(--transition-fast);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1045,7 +1043,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   pointer-events: none;
   user-select: none;
   animation: fall infinite linear;
-  transition: color 0.3s ease;
+  transition: color var(--transition-fast);
 }
 
 @keyframes fall {
@@ -1689,7 +1687,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 
 .overview-columns-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-layout);
   align-items: stretch;
   flex-grow: 1;
@@ -1781,7 +1779,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 .overview-budget-progress {
   height: 100%;
   border-radius: 3px;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition: width var(--transition-fast), background-color var(--transition-fast);
 }
 
 /* Карточки бюджетов во вкладке Бюджеты */
@@ -1847,7 +1845,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 .budget-card-progress {
   height: 100%;
   border-radius: 4px;
-  transition: width 0.3s ease;
+  transition: width var(--transition-fast);
   background-color: var(--bar-base-color, var(--accent-color));
   background-image: linear-gradient(
     -45deg,
@@ -2009,15 +2007,26 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   font-weight: 500;
 }
 
-/* Стилизация вертикального списка настроек */
+/* Стилизация вертикального списка настроек (Сетка с авто-растяжением последнего элемента при нечетном количестве) */
 .settings-list-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-layout);
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: 16px;
+}
+
+/* Если количество карточек настроек нечетное, последняя растягивается на всю ширину */
+.settings-list-container > .dashboard-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .settings-list-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Стили Kanban-доски */
@@ -2343,7 +2352,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   }
 }
 .card-fade-in {
-  animation: cardFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: cardFadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Стили для экранов профилей и PIN-клавиатуры */
@@ -2512,10 +2521,9 @@ input[type="number"]::-webkit-inner-spin-button:hover {
   flex-direction: column;
   gap: 10px;
   pointer-events: auto;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transition: opacity 0.15s ease;
   width: 320px;
   box-sizing: border-box;
-  transform: translateY(20px);
   opacity: 0;
   font-family: var(--font-main);
 }
@@ -2718,3 +2726,550 @@ body.auth-mode .sidebar-slim {
   animation-name: fall-full;
   top: -40px;
 }
+
+/* Стили выбора нескольких тегов */
+.tx-tags-selector-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.tx-tag-choice-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.tx-tag-choice-chip:hover {
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.tx-tag-choice-chip.active {
+  background-color: var(--accent-color-alpha);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* Анимации плавного появления и скрытия карточек Kanban */
+@keyframes taskCardSlideIn {
+  0% {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    overflow: hidden;
+  }
+  100% {
+    opacity: 1;
+    max-height: 400px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+  }
+}
+
+@keyframes taskCardSlideOut {
+  0% {
+    opacity: 1;
+    max-height: 400px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    overflow: hidden;
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    overflow: hidden;
+  }
+}
+
+.task-card-slide-in {
+  animation: taskCardSlideIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.task-card-slide-out {
+  animation: taskCardSlideOut 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+/* Анимация подсветки/импульса для обновленных или созданных карточек */
+@keyframes taskCardHighlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-color-alpha);
+    border-color: var(--accent-color);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--accent-color-alpha);
+    border-color: var(--accent-color);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: var(--border-color);
+  }
+}
+
+.task-card-highlight {
+  animation: taskCardHighlightPulse 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Вкладка настроек (сайдбар 25%, контент 75%) */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: var(--spacing-layout);
+  flex-grow: 1;
+  min-height: 0;
+  margin-top: 0;
+  align-items: start;
+}
+
+.settings-nav-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-layout);
+}
+
+.settings-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: #181818;
+  color: var(--accent-color);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform 0.1s ease;
+  font-weight: 500;
+  font-family: inherit;
+  outline: none;
+  user-select: none;
+}
+
+.settings-nav-btn:hover {
+  color: var(--accent-color-hover);
+  border-color: var(--accent-color);
+}
+
+.settings-nav-btn.active {
+  color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  background-color: #181818 !important;
+}
+
+/* Отключить анимацию сжатия при нажатии для всех кнопок в настройках */
+.settings-nav-btn:active,
+#settings-screen .btn:active {
+  transform: none !important;
+}
+
+.settings-tab-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.settings-tab-content {
+  display: none;
+}
+
+.settings-tab-content.active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-layout);
+  width: 100%;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-layout);
+  width: 100%;
+}
+
+.settings-form .input-group {
+  margin-bottom: 0;
+}
+
+.settings-form button {
+  align-self: flex-start;
+}
+
+.settings-action-row {
+  display: flex;
+  gap: var(--spacing-layout);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Новые стили для вкладки аналитики */
+#tab-analytics.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  gap: var(--spacing-layout);
+}
+
+#tab-analytics .content-header {
+  margin-bottom: 0;
+}
+
+#tab-analytics.active .analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: var(--spacing-layout);
+  flex-grow: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+#tab-analytics.active .dashboard-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.analytics-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-layout);
+  width: 100%;
+}
+
+.analytics-legend-item {
+  transition: background-color var(--transition-fast);
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.analytics-legend-item:hover {
+  background-color: var(--bg-input);
+}
+
+.analytics-insight-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px var(--spacing-card);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-height: 0;
+}
+
+.analytics-insight-item span.material-symbols-outlined {
+  font-size: 20px;
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.analytics-insight-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.analytics-insight-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.analytics-insight-value {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  #tab-analytics.active {
+    overflow-y: auto !important;
+  }
+  #tab-analytics.active .analytics-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+  .analytics-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Стили для экрана Информация */
+.info-layout-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-layout);
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.info-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 2.5fr; /* Left panel is narrower, right panel is wider */
+  gap: var(--spacing-layout);
+  flex-grow: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.info-left-panel, .info-right-panel {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.info-left-panel {
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.info-right-panel {
+  flex-direction: row;
+  gap: var(--spacing-layout);
+  padding: var(--spacing-card);
+}
+
+.info-help-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  padding-right: var(--spacing-card);
+}
+
+.info-help-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: left;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.info-help-nav-btn:hover {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.info-help-nav-btn.active {
+  background-color: var(--accent-color-alpha);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.info-help-nav-btn span.material-symbols-outlined {
+  font-size: 18px;
+}
+
+.info-help-content-area {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-left: 4px;
+}
+
+.info-help-content-panel {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-help-content-panel.active {
+  display: flex;
+}
+
+.info-help-content-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.info-help-content-panel h3 span.material-symbols-outlined {
+  color: var(--accent-color);
+  font-size: 24px;
+}
+
+.info-help-content-panel p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.info-help-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.info-help-step-item {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-help-step-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.info-help-step-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .info-layout-container {
+    overflow-y: auto !important;
+  }
+  
+  .info-columns-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    flex-grow: 0 !important;
+  }
+
+  .info-left-panel, .info-right-panel {
+    height: auto !important;
+    min-height: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .info-right-panel {
+    flex-direction: column !important;
+  }
+
+  .info-help-sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding-right: 0 !important;
+    padding-bottom: var(--spacing-card) !important;
+    white-space: nowrap !important;
+    scrollbar-width: thin;
+  }
+
+  .info-help-sidebar::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .info-help-nav-btn {
+    width: auto !important;
+    display: inline-flex !important;
+    flex-shrink: 0 !important;
+  }
+
+  .info-help-content-area {
+    height: auto !important;
+    overflow-y: visible !important;
+    padding-left: 0 !important;
+  }
+}
+
+/* Контекстное меню для категорий и тегов (в стиле custom-select) */
+.category-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.category-context-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 150px;
+  z-index: 10001;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 4px 0;
+}
+
+.category-menu-wrapper.open .category-context-menu {
+  display: block;
+}
+
+.category-context-menu .custom-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  width: 100%;
+}
+
+.category-context-menu .custom-option span.material-symbols-outlined {
+  font-size: 16px;
+}
+

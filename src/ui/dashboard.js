@@ -84,7 +84,7 @@ export const dashboardMethods = {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
-    budgets.slice(0, 4).forEach(bgt => {
+    budgets.forEach(bgt => {
       const cat = categories.find(c => c.id === bgt.categoryId);
       if (!cat) return;
 
@@ -145,7 +145,7 @@ export const dashboardMethods = {
 
     container.innerHTML = '';
     
-    goals.slice(0, 4).forEach(goal => {
+    goals.forEach(goal => {
       const spent = transactions
         .filter(t => t.type === 'savings' && t.goalId === goal.id)
         .reduce((sum, t) => sum + t.amount, 0);
@@ -193,7 +193,7 @@ export const dashboardMethods = {
     const categories = db.getCategories();
 
     // Выводим до 4 ближайших платежей
-    sorted.slice(0, 4).forEach(plan => {
+    sorted.forEach(plan => {
       const card = document.createElement('div');
       card.className = 'budget-card';
 
@@ -218,7 +218,7 @@ export const dashboardMethods = {
           <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); word-break: break-word;">
             ${this.formatSentenceCase(this.escapeHtml(plan.description))}
           </span>
-          <span class="status-badge ${statusClass}" style="flex-shrink: 0;">${this.formatSentenceCase(statusLabel)}</span>
+          ${statusLabel !== 'Ожидает' ? `<span class="status-badge ${statusClass}" style="flex-shrink: 0;">${this.formatSentenceCase(statusLabel)}</span>` : ''}
         </div>
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 11px;">
           <div style="display: flex; align-items: center; gap: 6px; color: ${cat ? cat.color : 'var(--text-muted)'};">
@@ -252,18 +252,26 @@ export const dashboardMethods = {
     });
 
     // Отображаем первые 4 задачи
-    sorted.slice(0, 4).forEach(task => {
+    sorted.forEach(task => {
       const card = document.createElement('div');
       card.className = 'budget-card';
 
+      let statusColor = '#94a3b8'; // Grey for todo
+      if (task.status === 'in_progress') {
+        statusColor = '#38bdf8'; // Blue for in_progress
+      } else if (task.status === 'done') {
+        statusColor = '#22c55e'; // Green for done
+      }
+
       card.innerHTML = `
-        <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); word-break: break-word;">
-            ${this.formatSentenceCase(this.escapeHtml(task.title))}
-          </span>
+        <div class="budget-card-header">
+          <div class="budget-card-title" style="color: ${statusColor};">
+            <span class="material-symbols-outlined">assignment</span>
+            <span>${this.formatSentenceCase(this.escapeHtml(task.title))}</span>
+          </div>
         </div>
         ${task.description ? `
-          <div style="color: var(--text-secondary); font-size: 12px; line-height: 1.4; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word;">
+          <div style="color: var(--text-secondary); font-size: 12px; line-height: 1.4; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word;">
             ${this.formatSentenceCase(this.escapeHtml(task.description))}
           </div>
         ` : ''}
