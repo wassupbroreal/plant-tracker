@@ -1120,7 +1120,7 @@ input[type="number"]::-webkit-inner-spin-button:hover {
 /* Стили вкладки Категории */
 .categories-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 25% 1fr;
   gap: var(--spacing-layout);
   align-items: start;
   flex-grow: 1;
@@ -3489,7 +3489,7 @@ body.auth-mode .sidebar-slim {
 
 .info-columns-grid {
   display: grid;
-  grid-template-columns: 1fr 2.5fr; /* Left panel is narrower, right panel is wider */
+  grid-template-columns: 1fr 3fr; /* Left panel is narrower (25%), right panel is wider (75%) */
   gap: var(--spacing-layout);
   flex-grow: 1;
   min-height: 0;
