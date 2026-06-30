@@ -921,22 +921,22 @@
             </div>
 
             <!-- Блок суммирования запланированных платежей -->
-            <div style="margin-bottom: var(--spacing-layout); display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-layout); width: 100%;">
-              <div class="dashboard-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                <span style="font-size: 10px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px; text-align: center;">Запланировано доходов</span>
-                <strong id="planning-sum-income" style="font-size: 16px; color: var(--color-success); font-family: 'JetBrains Mono', monospace;">0.00 ₽</strong>
+            <div class="analytics-stats-row" style="margin-bottom: var(--spacing-layout);">
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Запланировано доходов</span>
+                <span id="planning-sum-income" style="font-size: 18px; font-weight: bold; color: var(--color-success);">0.00 ₽</span>
               </div>
-              <div class="dashboard-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                <span style="font-size: 10px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px; text-align: center;">Запланировано расходов</span>
-                <strong id="planning-sum-expense" style="font-size: 16px; color: var(--color-danger); font-family: 'JetBrains Mono', monospace;">0.00 ₽</strong>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Запланировано расходов</span>
+                <span id="planning-sum-expense" style="font-size: 18px; font-weight: bold; color: var(--color-danger);">0.00 ₽</span>
               </div>
-              <div class="dashboard-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                <span style="font-size: 10px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px; text-align: center;">Запланировано накоплений</span>
-                <strong id="planning-sum-savings" style="font-size: 16px; color: var(--color-savings); font-family: 'JetBrains Mono', monospace;">0.00 ₽</strong>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Запланировано накоплений</span>
+                <span id="planning-sum-savings" style="font-size: 18px; font-weight: bold; color: var(--color-savings);">0.00 ₽</span>
               </div>
-              <div class="dashboard-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                <span style="font-size: 10px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px; text-align: center;">Ожидаемый баланс</span>
-                <strong id="planning-sum-net" style="font-size: 16px; color: var(--accent-color); font-family: 'JetBrains Mono', monospace;">0.00 ₽</strong>
+              <div class="dashboard-card" style="padding: var(--spacing-card); display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px;">Ожидаемый баланс</span>
+                <span id="planning-sum-net" style="font-size: 18px; font-weight: bold; color: var(--accent-color);">0.00 ₽</span>
               </div>
             </div>
 
