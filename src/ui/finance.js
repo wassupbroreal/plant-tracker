@@ -628,6 +628,40 @@ export const financeMethods = {
       return true;
     });
 
+    // Вычисление суммарных показателей запланированных платежей
+    let sumIncome = 0;
+    let sumExpense = 0;
+    let sumSavings = 0;
+
+    filtered.forEach(p => {
+      if (p.type === 'income') sumIncome += p.amount;
+      else if (p.type === 'expense') sumExpense += p.amount;
+      else if (p.type === 'savings') sumSavings += p.amount;
+    });
+
+    const sumNet = sumIncome - sumExpense - sumSavings;
+
+    const sumIncomeEl = document.getElementById('planning-sum-income');
+    const sumExpenseEl = document.getElementById('planning-sum-expense');
+    const sumSavingsEl = document.getElementById('planning-sum-savings');
+    const sumNetEl = document.getElementById('planning-sum-net');
+
+    if (sumIncomeEl) sumIncomeEl.textContent = this.formatAmount(sumIncome);
+    if (sumExpenseEl) sumExpenseEl.textContent = this.formatAmount(sumExpense);
+    if (sumSavingsEl) sumSavingsEl.textContent = this.formatAmount(sumSavings);
+    if (sumNetEl) {
+      if (sumNet > 0) {
+        sumNetEl.textContent = '+' + this.formatAmount(sumNet);
+        sumNetEl.style.color = 'var(--color-success)';
+      } else if (sumNet < 0) {
+        sumNetEl.textContent = '−' + this.formatAmount(Math.abs(sumNet));
+        sumNetEl.style.color = 'var(--color-danger)';
+      } else {
+        sumNetEl.textContent = this.formatAmount(0);
+        sumNetEl.style.color = 'var(--text-primary)';
+      }
+    }
+
     const groups = {};
     filtered.forEach(plan => {
       if (!groups[plan.date]) {
