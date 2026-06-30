@@ -72,20 +72,35 @@ export const settingsMethods = {
     }
 
     // --- НАСТРОЙКИ ---
-    if (this.settingsCurrencyForm) {
-      this.settingsCurrencyForm.addEventListener('submit', (e) => {
+    if (this.settingsGeneralForm) {
+      this.settingsGeneralForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const currency = this.settingsCurrency.value;
+        const finMonthStart = parseInt(this.settingsFinMonthStart.value) || 1;
+        const roundAmounts = this.settingsRoundAmounts.checked;
+        const roundUpMode = this.settingsRoundUpMode ? this.settingsRoundUpMode.value : 'none';
+        const roundUpGoalId = this.settingsRoundUpGoal ? this.settingsRoundUpGoal.value : '';
         const user = db.getUser();
         if (user) {
-          db.setUser(user.username, currency, user.passcode, user.avatar);
+          db.setUser(
+            user.username,
+            currency,
+            user.passcode,
+            user.avatar,
+            user.theme,
+            finMonthStart,
+            roundAmounts,
+            roundUpMode,
+            roundUpGoalId
+          );
           this.renderTransactions();
           this.renderOverview();
           this.renderBudgets();
           this.renderSavingsGoals();
           this.renderPlanning();
+          this.renderAnalytics();
         }
-        alert('Валюта приложения успешно изменена!');
+        alert('Настройки успешно сохранены!');
       });
     }
 
@@ -130,7 +145,17 @@ export const settingsMethods = {
             
             if (await this.showConfirm('Вы уверены, что хотите импортировать данные? Это заменит все текущие транзакции, категории, заметки, задачи и настройки.')) {
               if (importedData.user) {
-                db.setUser(importedData.user.username, importedData.user.currency || 'RUB');
+                db.setUser(
+                  importedData.user.username,
+                  importedData.user.currency || 'RUB',
+                  importedData.user.passcode || '',
+                  importedData.user.avatar || '',
+                  importedData.user.theme || 'lime',
+                  importedData.user.financialMonthStart || 1,
+                  importedData.user.roundAmounts || false,
+                  importedData.user.roundUpMode || 'none',
+                  importedData.user.roundUpGoalId || ''
+                );
               }
               if (importedData.categories) {
                 db.saveCategories(importedData.categories);
@@ -254,6 +279,28 @@ export const settingsMethods = {
 
     this.updateAvatarDisplay(user.avatar, user.username);
 
+    // Prefill general settings
+    if (this.settingsCurrency) {
+      this.settingsCurrency.value = user.currency || 'RUB';
+    }
+    if (this.settingsFinMonthStart) {
+      this.settingsFinMonthStart.value = user.financialMonthStart || 1;
+    }
+    if (this.settingsRoundAmounts) {
+      this.settingsRoundAmounts.checked = !!user.roundAmounts;
+    }
+
+    // Populate roundUp goals dropdown in settings tab
+    if (this.settingsRoundUpGoal) {
+      const goals = db.getGoals();
+      this.settingsRoundUpGoal.innerHTML = '<option value="">Не выбрано</option>' + 
+        goals.map(g => `<option value="${g.id}">${this.escapeHtml(g.title)}</option>`).join('');
+      this.settingsRoundUpGoal.value = user.roundUpGoalId || '';
+    }
+    if (this.settingsRoundUpMode) {
+      this.settingsRoundUpMode.value = user.roundUpMode || 'none';
+    }
+
     // Подсветка активной темы в настройках
     const swatches = document.querySelectorAll('.theme-swatch');
     swatches.forEach(swatch => {
@@ -263,6 +310,105 @@ export const settingsMethods = {
         swatch.classList.remove('active');
       }
     });
+
+    // Отрисовка достижений
+    this.renderAchievementsList();
+  },
+
+  renderAchievementsList() {
+    const grid = document.getElementById('profile-achievements-grid');
+    const counter = document.getElementById('profile-achievements-counter');
+    if (!grid) return;
+
+    const achievements = db.getAchievements();
+    const unlockedCount = achievements.filter(a => a.unlocked).length;
+
+    if (counter) {
+      counter.textContent = `${unlockedCount} / ${achievements.length}`;
+    }
+
+    grid.innerHTML = achievements.map(ach => {
+      const isUnlocked = ach.unlocked;
+      const cardClass = isUnlocked ? 'achievement-card unlocked' : 'achievement-card';
+      const icon = ach.icon || 'star';
+      
+      let progressHTML = '';
+      if (!isUnlocked && ach.maxProgress > 1) {
+        const percent = Math.min(100, Math.round((ach.progress / ach.maxProgress) * 100));
+        progressHTML = `
+          <div class="achievement-progress-wrapper">
+            <span class="achievement-progress-text">${ach.progress} / ${ach.maxProgress}</span>
+            <div class="achievement-progress-bar-bg">
+              <div class="achievement-progress-bar-fill" style="width: ${percent}%;"></div>
+            </div>
+          </div>
+        `;
+      }
+
+      const dateHTML = isUnlocked ? `<span class="achievement-unlocked-date">Открыто ${ach.unlockedAt}</span>` : '';
+      const lockHTML = !isUnlocked ? `<span class="material-symbols-outlined achievement-lock-icon">lock</span>` : '';
+
+      return `
+        <div class="${cardClass}">
+          <span class="achievement-xp-badge">+${ach.xp} XP</span>
+          <div class="achievement-icon-wrapper">
+            <span class="material-symbols-outlined">${icon}</span>
+            ${lockHTML}
+          </div>
+          <div class="achievement-title">${ach.title}</div>
+          <div class="achievement-desc">${ach.desc}</div>
+          ${progressHTML}
+          ${dateHTML}
+        </div>
+      `;
+    }).join('');
+
+    // Отрисовка уровня
+    this.renderLevelProgress(achievements);
+  },
+
+  renderLevelProgress(achievements) {
+    const totalXp = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + (a.xp || 100), 0);
+    
+    const levels = [
+      { level: 1, name: 'Семечко', minXp: 0, maxXp: 200 },
+      { level: 2, name: 'Росток', minXp: 200, maxXp: 500 },
+      { level: 3, name: 'Листик', minXp: 500, maxXp: 900 },
+      { level: 4, name: 'Цветок', minXp: 900, maxXp: 1400 },
+      { level: 5, name: 'Дерево', minXp: 1400, maxXp: 99999 }
+    ];
+    
+    let current = levels[0];
+    for (let i = 0; i < levels.length; i++) {
+      if (totalXp >= levels[i].minXp) {
+        current = levels[i];
+      }
+    }
+    
+    const isMax = current.level === 5;
+    const range = current.maxXp - current.minXp;
+    const progress = totalXp - current.minXp;
+    const percent = isMax ? 100 : Math.min(100, Math.round((progress / range) * 100));
+
+    const badgeEl = document.getElementById('profile-level-badge');
+    const nameEl = document.getElementById('profile-level-name');
+    const textEl = document.getElementById('profile-xp-text');
+    const fillEl = document.getElementById('profile-xp-fill');
+
+    if (badgeEl) badgeEl.textContent = `Ур. ${current.level}`;
+    if (nameEl) nameEl.textContent = current.name;
+    
+    if (textEl) {
+      if (isMax) {
+        textEl.textContent = `${totalXp} XP (Максимум)`;
+      } else {
+        textEl.textContent = `${totalXp} / ${current.maxXp} XP`;
+      }
+    }
+    
+    if (fillEl) {
+      fillEl.style.width = `${percent}%`;
+    }
   },
 
   updateAvatarDisplay(avatarBase64, username) {

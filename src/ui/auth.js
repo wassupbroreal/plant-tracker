@@ -2,6 +2,32 @@ import { db } from '../db.js';
 
 export const authMethods = {
   bindAuthEvents() {
+    // Переключение видимости пароля
+    const togglePasswordVisibility = (inputEl, btnEl) => {
+      if (!inputEl || !btnEl) return;
+      const iconEl = btnEl.querySelector('span');
+      if (!iconEl) return;
+      if (inputEl.type === 'password') {
+        inputEl.type = 'text';
+        iconEl.textContent = 'visibility_off';
+      } else {
+        inputEl.type = 'password';
+        iconEl.textContent = 'visibility';
+      }
+    };
+
+    if (this.toggleLoginPasswordBtn) {
+      this.toggleLoginPasswordBtn.addEventListener('click', () => {
+        togglePasswordVisibility(this.loginPasswordInput, this.toggleLoginPasswordBtn);
+      });
+    }
+
+    if (this.toggleRegisterPasswordBtn) {
+      this.toggleRegisterPasswordBtn.addEventListener('click', () => {
+        togglePasswordVisibility(this.registerPasswordInput, this.toggleRegisterPasswordBtn);
+      });
+    }
+
     // События профилей и входа
     if (this.switchToRegisterBtn) {
       this.switchToRegisterBtn.addEventListener('click', () => {
@@ -10,7 +36,14 @@ export const authMethods = {
           this.registerUsernameInput.value = '';
           this.registerUsernameInput.focus();
         }
-        if (this.registerPasswordInput) this.registerPasswordInput.value = '';
+        if (this.registerPasswordInput) {
+          this.registerPasswordInput.value = '';
+          this.registerPasswordInput.type = 'password';
+          if (this.toggleRegisterPasswordBtn) {
+            const icon = this.toggleRegisterPasswordBtn.querySelector('span');
+            if (icon) icon.textContent = 'visibility';
+          }
+        }
         if (this.registerErrorMsg) this.registerErrorMsg.textContent = '';
       });
     }
@@ -20,6 +53,13 @@ export const authMethods = {
         this.switchAuthView(this.loginView);
         if (this.loginUsernameInput) {
           this.loginUsernameInput.focus();
+        }
+        if (this.loginPasswordInput) {
+          this.loginPasswordInput.type = 'password';
+          if (this.toggleLoginPasswordBtn) {
+            const icon = this.toggleLoginPasswordBtn.querySelector('span');
+            if (icon) icon.textContent = 'visibility';
+          }
         }
         if (this.loginErrorMsg) this.loginErrorMsg.textContent = '';
       });
@@ -104,10 +144,24 @@ export const authMethods = {
   resetAuthForms() {
     this.switchAuthView(this.loginView);
     if (this.loginUsernameInput) this.loginUsernameInput.value = '';
-    if (this.loginPasswordInput) this.loginPasswordInput.value = '';
+    if (this.loginPasswordInput) {
+      this.loginPasswordInput.value = '';
+      this.loginPasswordInput.type = 'password';
+      if (this.toggleLoginPasswordBtn) {
+        const icon = this.toggleLoginPasswordBtn.querySelector('span');
+        if (icon) icon.textContent = 'visibility';
+      }
+    }
     if (this.loginErrorMsg) this.loginErrorMsg.textContent = '';
     if (this.registerUsernameInput) this.registerUsernameInput.value = '';
-    if (this.registerPasswordInput) this.registerPasswordInput.value = '';
+    if (this.registerPasswordInput) {
+      this.registerPasswordInput.value = '';
+      this.registerPasswordInput.type = 'password';
+      if (this.toggleRegisterPasswordBtn) {
+        const icon = this.toggleRegisterPasswordBtn.querySelector('span');
+        if (icon) icon.textContent = 'visibility';
+      }
+    }
     if (this.registerErrorMsg) this.registerErrorMsg.textContent = '';
   }
 };

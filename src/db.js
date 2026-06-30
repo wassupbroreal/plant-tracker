@@ -10,7 +10,8 @@ const DB_KEYS = {
   CHECKLISTS: 'plant_checklists',
   TASKS: 'plant_tasks',
   GOALS: 'plant_goals',
-  TAGS: 'plant_tags'
+  TAGS: 'plant_tags',
+  ACHIEVEMENTS: 'plant_achievements'
 };
 
 const DEFAULT_CATEGORIES = [
@@ -36,6 +37,19 @@ const PROFILE_GRADIENTS = [
   'linear-gradient(135deg, #ef4444, #f43f5e)'
 ];
 
+export const ACHIEVEMENT_DEFINITIONS = [
+  { id: 'first_tx', title: 'Первый росток', desc: 'Добавьте вашу первую транзакцию', icon: 'potted_plant', maxProgress: 1, xp: 100 },
+  { id: 'first_budget', title: 'Архитектор бюджетов', desc: 'Создайте ваш первый бюджет категории', icon: 'account_balance_wallet', maxProgress: 1, xp: 100 },
+  { id: 'first_goal', title: 'Целеустремленный', desc: 'Создайте вашу первую цель накопления', icon: 'track_changes', maxProgress: 1, xp: 100 },
+  { id: 'first_plan', title: 'Мастер планов', desc: 'Создайте первый запланированный платеж', icon: 'event_upcoming', maxProgress: 1, xp: 100 },
+  { id: 'tx_count_10', title: 'Скрупулезность', desc: 'Добавьте 10 транзакций всего', icon: 'receipt_long', maxProgress: 10, xp: 250 },
+  { id: 'first_task_done', title: 'Дисциплинированный', desc: 'Выполните первую задачу в Органайзере', icon: 'task_alt', maxProgress: 1, xp: 100 },
+  { id: 'savings_10k', title: 'Копилка', desc: 'Отложите суммарно 10 000 ₽ в накопления', icon: 'savings', maxProgress: 10000, xp: 300 },
+  { id: 'frugal_month', title: 'Экономия', desc: 'Потратьте менее 50% дохода за расчетный период', icon: 'percent', maxProgress: 1, xp: 250 },
+  { id: 'rich_harvest', title: 'Богатый урожай', desc: 'Суммарный доход профиля превысил 100 000 ₽', icon: 'monetization_on', maxProgress: 100000, xp: 400 },
+  { id: 'notes_count_3', title: 'Постоянство', desc: 'Создайте 3 заметки в Органайзере', icon: 'description', maxProgress: 3, xp: 200 }
+];
+
 export const db = {
   // Инициализация базы данных
   init() {
@@ -59,7 +73,8 @@ export const db = {
       CHECKLISTS: [],
       TASKS: [],
       GOALS: [],
-      TAGS: []
+      TAGS: [],
+      ACHIEVEMENTS: {}
     };
 
     Object.entries(keys).forEach(([keyName, defaultValue]) => {
@@ -75,7 +90,7 @@ export const db = {
       const profile = this.getProfiles().find(p => p.id === profileId);
       const username = profile ? (profile.login || profile.name) : 'Пользователь';
       const pin = profile ? (profile.password || profile.pin) : '';
-      const user = { username, currency: 'RUB', passcode: pin, avatar: '', theme: 'lime' };
+      const user = { username, currency: 'RUB', passcode: pin, avatar: '', theme: 'lime', financialMonthStart: 1, roundAmounts: false, roundUpMode: 'none', roundUpGoalId: '' };
       localStorage.setItem(userKey, JSON.stringify(user));
     }
   },
@@ -127,7 +142,6 @@ export const db = {
     const updatedProfiles = profiles.filter(p => p.id !== profileId);
     this.saveProfiles(updatedProfiles);
 
-    // Удаляем все ключи localStorage, связанные с этим профилем
     const keysToRemove = [
       `plant_${profileId}_user`,
       `plant_${profileId}_categories`,
@@ -138,7 +152,8 @@ export const db = {
       `plant_${profileId}_checklists`,
       `plant_${profileId}_tasks`,
       `plant_${profileId}_goals`,
-      `plant_${profileId}_tags`
+      `plant_${profileId}_tags`,
+      `plant_${profileId}_achievements`
     ];
     keysToRemove.forEach(k => localStorage.removeItem(k));
 
@@ -174,13 +189,28 @@ export const db = {
     return data ? JSON.parse(data) : null;
   },
 
-  setUser(username, currency, passcode, avatar, theme) {
+  setUser(username, currency, passcode, avatar, theme, financialMonthStart, roundAmounts, roundUpMode, roundUpGoalId) {
     const existing = this.getProfile();
     const finalCurrency = currency || (existing ? existing.currency : 'RUB');
     const finalPasscode = passcode !== undefined ? passcode : (existing ? existing.passcode : '');
     const finalAvatar = avatar !== undefined ? avatar : (existing ? existing.avatar : '');
     const finalTheme = theme !== undefined ? theme : (existing ? (existing.theme || 'lime') : 'lime');
-    const user = { username, currency: finalCurrency, passcode: finalPasscode, avatar: finalAvatar, theme: finalTheme };
+    const finalFinancialMonthStart = financialMonthStart !== undefined ? parseInt(financialMonthStart) : (existing ? (existing.financialMonthStart || 1) : 1);
+    const finalRoundAmounts = roundAmounts !== undefined ? !!roundAmounts : (existing ? (existing.roundAmounts || false) : false);
+    const finalRoundUpMode = roundUpMode !== undefined ? roundUpMode : (existing ? (existing.roundUpMode || 'none') : 'none');
+    const finalRoundUpGoalId = roundUpGoalId !== undefined ? roundUpGoalId : (existing ? (existing.roundUpGoalId || '') : '');
+    
+    const user = { 
+      username, 
+      currency: finalCurrency, 
+      passcode: finalPasscode, 
+      avatar: finalAvatar, 
+      theme: finalTheme,
+      financialMonthStart: finalFinancialMonthStart,
+      roundAmounts: finalRoundAmounts,
+      roundUpMode: finalRoundUpMode,
+      roundUpGoalId: finalRoundUpGoalId
+    };
     localStorage.setItem(this.getKey('USER'), JSON.stringify(user));
     localStorage.setItem('plant_session_active', 'true');
 
@@ -252,6 +282,44 @@ export const db = {
       ...tx
     };
     transactions.push(newTx);
+
+    // Auto-Savings Copilka interceptor
+    if (tx.type === 'expense') {
+      const user = this.getUser();
+      if (user && user.roundUpMode && user.roundUpMode !== 'none' && user.roundUpGoalId) {
+        const goals = this.getGoals();
+        const hasGoal = goals.some(g => g.id === user.roundUpGoalId);
+        if (hasGoal) {
+          let roundTo = 0;
+          if (user.roundUpMode === '10') roundTo = 10;
+          else if (user.roundUpMode === '50') roundTo = 50;
+          else if (user.roundUpMode === '100') roundTo = 100;
+          
+          if (roundTo > 0) {
+            const amount = tx.amount;
+            const nextMultiple = Math.ceil(amount / roundTo) * roundTo;
+            let remainder = nextMultiple - amount;
+            
+            if (remainder > 0) {
+              const savingsTx = {
+                id: 'tx-' + this.generateId(),
+                createdAt: Date.now() + 1, // ensure chronological order
+                description: `Копилка (округление: ${tx.description})`,
+                type: 'savings',
+                categoryId: 'cat-piggy',
+                tagIds: [],
+                tagId: '',
+                amount: parseFloat(remainder.toFixed(2)),
+                date: tx.date || new Date().toISOString().substring(0, 10),
+                goalId: user.roundUpGoalId
+              };
+              transactions.push(savingsTx);
+            }
+          }
+        }
+      }
+    }
+
     this.saveTransactions(transactions);
     return newTx;
   },
@@ -538,6 +606,71 @@ export const db = {
     this.saveTags(tags);
   },
 
+  // --- ДОСТИЖЕНИЯ (АЧИВКИ) ---
+  getAchievements() {
+    const data = localStorage.getItem(this.getKey('ACHIEVEMENTS'));
+    const userProgress = data ? JSON.parse(data) : {};
+    
+    return ACHIEVEMENT_DEFINITIONS.map(def => {
+      const progressData = userProgress[def.id] || { progress: 0, unlocked: false, unlockedAt: null };
+      return {
+        ...def,
+        progress: progressData.progress,
+        unlocked: progressData.unlocked,
+        unlockedAt: progressData.unlockedAt
+      };
+    });
+  },
+
+  updateAchievementProgress(id, value, mode = 'set') {
+    const data = localStorage.getItem(this.getKey('ACHIEVEMENTS'));
+    const userProgress = data ? JSON.parse(data) : {};
+    
+    const def = ACHIEVEMENT_DEFINITIONS.find(d => d.id === id);
+    if (!def) return null;
+
+    if (!userProgress[id]) {
+      userProgress[id] = { progress: 0, unlocked: false, unlockedAt: null };
+    }
+
+    const current = userProgress[id];
+    if (current.unlocked) return null;
+
+    let oldProgress = current.progress;
+    let newProgress = oldProgress;
+
+    if (mode === 'increment') {
+      newProgress = oldProgress + value;
+    } else {
+      newProgress = value;
+    }
+
+    // Ограничение прогресса
+    newProgress = Math.max(0, Math.min(newProgress, def.maxProgress));
+    current.progress = newProgress;
+
+    let newlyUnlocked = false;
+    if (newProgress >= def.maxProgress && !current.unlocked) {
+      current.unlocked = true;
+      current.unlockedAt = new Date().toLocaleDateString('ru-RU');
+      newlyUnlocked = true;
+    }
+
+    localStorage.setItem(this.getKey('ACHIEVEMENTS'), JSON.stringify(userProgress));
+
+    if (newlyUnlocked) {
+      return {
+        id,
+        title: def.title,
+        desc: def.desc,
+        icon: def.icon,
+        ...current
+      };
+    }
+
+    return null;
+  },
+
   // --- СБРОС ВСЕХ ДАННЫХ ПРОФИЛЯ ---
   resetAll() {
     const activeId = this.getActiveProfileId();
@@ -552,6 +685,7 @@ export const db = {
       localStorage.removeItem(`plant_${activeId}_tasks`);
       localStorage.removeItem(`plant_${activeId}_goals`);
       localStorage.removeItem(`plant_${activeId}_tags`);
+      localStorage.removeItem(`plant_${activeId}_achievements`);
 
       let profiles = this.getProfiles();
       profiles = profiles.filter(p => p.id !== activeId);

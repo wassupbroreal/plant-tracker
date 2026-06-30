@@ -319,6 +319,10 @@ export const productivityMethods = {
   // --- ЛОГИКА ЗАМЕТОК ---
   renderNotes(highlightId = null, repopulateEditor = true) {
     const notes = db.getNotes();
+    
+    // Проверка достижений заметок
+    this.checkAchievement('notes_count_3', notes.length);
+    
     if (!this.notesSidebarList) return;
     this.notesSidebarList.innerHTML = '';
 
@@ -795,6 +799,11 @@ export const productivityMethods = {
           targetCard.classList.remove('task-card-highlight');
         }, { once: true });
       }
+    }
+
+    // Проверка достижений задач
+    if (tasks.some(t => t.status === 'done')) {
+      this.checkAchievement('first_task_done', 1);
     }
   }
 };

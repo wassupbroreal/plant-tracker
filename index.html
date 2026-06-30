@@ -100,7 +100,12 @@
                   </div>
                   <div class="input-group">
                     <label for="login-password">Пароль</label>
-                    <input type="password" id="login-password" required placeholder="Введите пароль..." autocomplete="current-password">
+                    <div class="password-wrapper">
+                      <input type="password" id="login-password" required placeholder="Введите пароль..." autocomplete="current-password">
+                      <button type="button" class="password-toggle-btn" id="toggle-login-password">
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div id="login-error-msg" style="color: var(--color-danger); font-size: 12px; text-align: center; min-height: 16px; font-weight: 500; margin-bottom: 8px;"></div>
@@ -125,7 +130,12 @@
                   </div>
                   <div class="input-group">
                     <label for="register-password">Пароль</label>
-                    <input type="password" id="register-password" required placeholder="Придумайте пароль..." autocomplete="new-password">
+                    <div class="password-wrapper">
+                      <input type="password" id="register-password" required placeholder="Придумайте пароль..." autocomplete="new-password">
+                      <button type="button" class="password-toggle-btn" id="toggle-register-password">
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div id="register-error-msg" style="color: var(--color-danger); font-size: 12px; text-align: center; min-height: 16px; font-weight: 500; margin-bottom: 8px;"></div>
@@ -224,8 +234,48 @@
               <p class="content-description">Сводка доходов, расходов, накоплений и лимитов бюджетов</p>
             </div>
 
+            <!-- Блок профиля -->
+            <div class="dashboard-card overview-profile-card">
+              <span class="material-symbols-outlined overview-profile-avatar">account_circle</span>
+              <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+                <div id="overview-profile-username" style="font-size: 20px; font-weight: bold; color: var(--text-primary);">Имя профиля</div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="overview-btn-edit-profile" style="align-self: flex-start; padding: 4px 10px; font-size: 11px;">
+                    <span class="material-symbols-outlined" style="font-size: 14px; margin-right: 4px;">edit</span>Редактировать
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" id="overview-btn-harvest" style="align-self: flex-start; padding: 4px 10px; font-size: 11px; display: flex; align-items: center; gap: 4px;">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">eco</span>Собрать урожай
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Блок уровня -->
+            <div class="dashboard-card overview-level-card" style="display: flex; align-items: center; gap: 16px; padding: 16px; margin-bottom: var(--spacing-layout); width: 100%;">
+              <div id="overview-plant-svg-container" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
+                <!-- Интерактивное SVG-растение рендерится динамически -->
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px;">Текущий уровень</span>
+                  <span id="overview-level-badge" style="font-size: 11px; font-weight: 700; color: var(--text-on-accent); background-color: var(--accent-color); padding: 2px 6px; border-radius: 4px;">Ур. 1</span>
+                </div>
+                <div id="overview-level-name" style="font-size: 18px; font-weight: 700; color: var(--accent-color);">Семечко</div>
+                
+                <div class="profile-xp-progress-wrapper" style="margin-top: 2px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Прогресс уровня</span>
+                    <span id="overview-xp-text" style="color: var(--text-secondary); font-weight: 500;">0 / 200 XP</span>
+                  </div>
+                  <div style="width: 100%; height: 6px; background-color: var(--bg-input); border-radius: 3px; overflow: hidden; border: 1px solid var(--border-color);">
+                    <div id="overview-xp-fill" style="height: 100%; width: 0%; background-color: var(--accent-color); border-radius: 3px; transition: width 0.3s ease;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Карточки сводки -->
-            <div class="overview-cards-grid">
+            <div class="overview-cards-grid" style="margin-bottom: var(--spacing-layout);">
               <div class="overview-card summary-card-balance">
                 <img src="img/budget.png" class="card-decor-img" alt="">
                 <div class="card-meta">
@@ -260,38 +310,82 @@
               </div>
             </div>
 
-            <!-- Новая трехколоночная сетка -->
-            <div class="overview-columns-grid">
-              <!-- Столбец 1: Бюджеты -->
-              <div class="overview-column">
-                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
-                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Бюджеты</span>
-                </div>
-                <div class="column-content" id="overview-budgets-list">
-                  <!-- Карточки бюджетов на текущий месяц (макс 3-4 шт.) -->
-                </div>
-              </div>
-
-              <!-- Столбец 2: Цели накопления -->
-              <div class="overview-column">
-                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
-                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Цели</span>
-                </div>
-                <div class="column-content" id="overview-goals-list">
-                  <!-- Карточки целей накопления (макс 3-4 шт.) -->
+            <!-- Блок: Советы Садовника и Календарь Цветения (2 колонки) -->
+            <div class="overview-widgets-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-layout); margin-bottom: var(--spacing-layout); width: 100%;">
+              <!-- Советы Садовника -->
+              <div class="dashboard-card overview-gardener-card" style="display: flex; align-items: flex-start; gap: 12px; padding: 16px;">
+                <span class="material-symbols-outlined" style="font-size: 36px; color: var(--accent-color); flex-shrink: 0; background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 8px; border-radius: 50%;">spa</span>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">Советы Садовника</span>
+                  <p id="overview-gardener-advice" style="font-size: 12px; color: var(--text-primary); line-height: 1.5; margin: 0;">Твой сад выглядит прекрасно! Продолжай в том же духе!</p>
                 </div>
               </div>
 
-              <!-- Столбец 3: Задачи -->
-              <div class="overview-column">
-                <div class="filter-panel" style="margin-bottom: 0; padding: 12px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; height: 38px; flex-shrink: 0;">
-                  <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.8px;">Задачи</span>
+              <!-- Календарь Цветения -->
+              <div class="dashboard-card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.5px;">Календарь Цветения</span>
+                  <span style="font-size: 10px; color: var(--text-muted);">Последние 14 дней</span>
                 </div>
-                <div class="column-content" id="overview-tasks-list">
-                  <!-- Задачи рендерятся динамически -->
+                <div id="overview-bloom-calendar" style="display: flex; align-items: center; justify-content: space-between; gap: 4px; flex-grow: 1; padding: 4px 0;">
+                  <!-- Точки календаря трат рендерятся динамически -->
                 </div>
               </div>
+            </div>
 
+            <!-- Нижний сплит-лейаут: Бюджеты/Цели/Задачи (слева 50%) и Достижения (справа 50%) -->
+            <div class="overview-bottom-layout">
+              <!-- Левая колонка (50%): Бюджеты, Цели, Задачи -->
+              <div class="overview-left-section">
+                
+                <!-- Блок бюджетов -->
+                <div class="dashboard-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Бюджеты</h3>
+                    <span id="overview-budgets-summary" style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">0.00 ₽ / 0.00 ₽</span>
+                  </div>
+                  <div class="column-content" id="overview-budgets-list">
+                    <!-- Карточки бюджетов -->
+                  </div>
+                </div>
+
+                <!-- Блок целей -->
+                <div class="dashboard-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Цели</h3>
+                    <span id="overview-goals-summary" style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">0.00 ₽ / 0.00 ₽</span>
+                  </div>
+                  <div class="column-content" id="overview-goals-list">
+                    <!-- Карточки целей -->
+                  </div>
+                </div>
+
+                <!-- Блок задач -->
+                <div class="dashboard-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Задачи</h3>
+                  </div>
+                  <div class="column-content" id="overview-tasks-list">
+                    <!-- Задачи -->
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Правая колонка (50%): Достижения -->
+              <div class="overview-right-section">
+                
+                <div class="dashboard-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Достижения</h3>
+                    <span class="profile-achievements-counter" id="overview-achievements-counter">0 / 10</span>
+                  </div>
+                  <div id="overview-achievements-list">
+                    <!-- Достижения по строкам рендерятся динамически -->
+                  </div>
+                </div>
+
+              </div>
             </div>
           </section>
 
@@ -507,7 +601,7 @@
                 </div>
 
                 <!-- Список транзакций -->
-                <div id="transactions-list" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <div id="transactions-list" style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
                   <!-- Заполняется динамически -->
                 </div>
                 <div class="empty-state" id="transactions-empty-state" style="display: none; margin-top: 12px;">
@@ -834,7 +928,7 @@
                   <input type="hidden" id="plan-id-edit">
                   
                   <div class="input-group">
-                    <label for="plan-description">Название</label>
+                    <label for="plan-description">Описание</label>
                     <input type="text" id="plan-description" required placeholder="···" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                   </div>
 
@@ -880,9 +974,39 @@
 
               <!-- Правая колонка: Список запланированных платежей -->
               <div class="categories-list-container">
+                <!-- Фильтры -->
+                <div class="filter-panel" style="margin-bottom: 0;">
+                  <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                    <div class="search-box" style="flex-grow: 1; margin-bottom: 0;">
+                      <span class="material-symbols-outlined">search</span>
+                      <input type="text" id="planning-search" placeholder="Поиск" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                    </div>
+                    <button type="button" class="filter-reset-icon-btn" id="planning-reset-filters-btn">
+                      <span class="material-symbols-outlined">restart_alt</span>
+                    </button>
+                  </div>
+                  <div class="filters-row">
+                    <select id="planning-filter-type">
+                      <option value="all">Все типы</option>
+                      <option value="income">Доход</option>
+                      <option value="expense">Расход</option>
+                      <option value="savings">Накопление</option>
+                    </select>
+                    <select id="planning-filter-category">
+                      <option value="all">Все категории</option>
+                    </select>
+                    <select id="planning-filter-tag">
+                      <option value="all">Все теги</option>
+                    </select>
+                    <div class="date-range" style="flex: 2;">
+                      <input type="date" id="planning-filter-date-start" placeholder="···" autocomplete="off">
+                      <span class="date-sep">—</span>
+                      <input type="date" id="planning-filter-date-end" placeholder="···" autocomplete="off">
+                    </div>
+                  </div>
+                </div>
 
-
-                <div id="planning-list" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <div id="planning-list" style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
                   <!-- Заполняется динамически -->
                 </div>
                 <div class="empty-state" id="planning-empty-state" style="display: none; margin-top: 12px;">
@@ -1490,34 +1614,98 @@
 
       <!-- ЭКРАН ПРОФИЛЯ -->
       <div id="profile-screen" class="screen">
-        <div class="profile-container">
-          <div class="profile-avatar-section">
-            <!-- Большой кликабельный круг для аватарки -->
-            <div class="profile-avatar-upload" id="profile-avatar-upload">
-              <img id="profile-avatar-img" src="" style="display: none;">
-              <span id="profile-avatar-placeholder" class="material-symbols-outlined">person</span>
-              <div class="avatar-upload-overlay">
-                <span class="material-symbols-outlined">photo_camera</span>
-              </div>
+        <div style="display: flex; flex-direction: column; width: 100%; height: 100%; padding: var(--spacing-layout); overflow-y: auto; gap: var(--spacing-layout);">
+          <div class="content-header" style="margin-bottom: 0;">
+            <div class="header-bg-shapes"></div>
+            <div class="header-title-row">
+              <span class="material-symbols-outlined header-icon">person</span>
+              <h1>Профиль</h1>
             </div>
-            <input type="file" id="profile-avatar-file-input" accept="image/*" style="display: none;">
-            <div class="avatar-help-text">Максимальный размер изображения: 512x512px</div>
+            <p class="content-description">Личные данные, статистика достижений и текущий уровень развития</p>
           </div>
 
-          <!-- Блок формы личных данных -->
-          <div class="dashboard-card profile-form-card">
-            <h3>Личные данные</h3>
-            <form id="profile-edit-form">
-              <div class="input-group">
-                <label for="profile-username">Логин профиля</label>
-                <input type="text" id="profile-username" required placeholder="···" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <div class="profile-layout-container" style="display: flex; flex-direction: column; gap: var(--spacing-layout); width: 100%;">
+            
+            <!-- Основной блок профиля -->
+            <div class="dashboard-card" style="display: flex; flex-direction: row; gap: 24px; padding: 24px; width: 100%; align-items: center; flex-wrap: wrap;">
+              
+              <!-- Аватарка (слева) -->
+              <div class="profile-avatar-section" style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0;">
+                <div class="profile-avatar-upload" id="profile-avatar-upload" style="margin-bottom: 0;">
+                  <img id="profile-avatar-img" src="" style="display: none;">
+                  <span id="profile-avatar-placeholder" class="material-symbols-outlined">person</span>
+                  <div class="avatar-upload-overlay">
+                    <span class="material-symbols-outlined">photo_camera</span>
+                  </div>
+                </div>
+                <input type="file" id="profile-avatar-file-input" accept="image/*" style="display: none;">
+                <div class="avatar-help-text" style="font-size: 10px;">512x512px max</div>
               </div>
-              <div class="input-group">
-                <label for="profile-passcode">Новый пароль доступа</label>
-                <input type="password" id="profile-passcode" placeholder="Введите новый пароль, чтобы изменить" autocomplete="off">
+
+              <!-- Форма редактирования (по центру) -->
+              <form id="profile-edit-form" style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; min-width: 250px;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <div class="input-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label for="profile-username">Логин профиля</label>
+                    <input type="text" id="profile-username" required placeholder="···" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="padding: 6px 10px;">
+                  </div>
+                  <div class="input-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label for="profile-passcode">Новый пароль доступа</label>
+                    <input type="password" id="profile-passcode" placeholder="Пароль для смены" autocomplete="off" style="padding: 6px 10px;">
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <div class="input-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label for="settings-roundup-mode">Автоокругление трат</label>
+                    <select id="settings-roundup-mode" style="padding: 6px 10px;">
+                      <option value="none">Отключено</option>
+                      <option value="10">До 10 ₽</option>
+                      <option value="50">До 50 ₽</option>
+                      <option value="100">До 100 ₽</option>
+                    </select>
+                  </div>
+                  <div class="input-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                    <label for="settings-roundup-goal">Цель для накоплений</label>
+                    <select id="settings-roundup-goal" style="padding: 6px 10px;">
+                      <option value="">Не выбрано</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="align-self: flex-start; margin-top: 4px; padding: 6px 16px;">Сохранить изменения</button>
+              </form>
+
+              <!-- Секция Уровня и Очков (справа) -->
+              <div class="profile-level-card-info" style="display: flex; flex-direction: column; gap: 8px; min-width: 260px; flex: 1.2; background-color: var(--bg-main); border: 1px solid var(--border-color); padding: 16px; border-radius: 6px; box-sizing: border-box;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.5px;">Текущий уровень</span>
+                  <span id="profile-level-badge" style="font-size: 11px; font-weight: 700; color: var(--text-on-accent); background-color: var(--accent-color); padding: 2px 6px; border-radius: 4px;">Ур. 1</span>
+                </div>
+                <div id="profile-level-name" style="font-size: 18px; font-weight: 700; color: var(--accent-color);">Семечко</div>
+                
+                <div class="profile-xp-progress-wrapper" style="margin-top: 8px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Прогресс уровня</span>
+                    <span id="profile-xp-text" style="color: var(--text-secondary); font-weight: 500;">0 / 200 XP</span>
+                  </div>
+                  <div style="width: 100%; height: 6px; background-color: var(--bg-input); border-radius: 3px; overflow: hidden; border: 1px solid var(--border-color);">
+                    <div id="profile-xp-fill" style="height: 100%; width: 0%; background-color: var(--accent-color); border-radius: 3px; transition: width 0.3s ease;"></div>
+                  </div>
+                </div>
               </div>
-              <button type="submit" class="btn btn-primary btn-block">Сохранить изменения</button>
-            </form>
+
+            </div>
+
+            <!-- Блок Достижений -->
+            <div class="dashboard-card profile-achievements-card" style="width: 100%; margin-top: 0; padding: 24px;">
+              <div class="profile-achievements-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0; text-align: left;">Список достижений</h3>
+                <span class="profile-achievements-counter" id="profile-achievements-counter" style="font-size: 13px; font-weight: 700; color: var(--accent-color); background-color: var(--bg-main); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color);">0 / 10</span>
+              </div>
+              <div class="profile-achievements-grid" id="profile-achievements-grid">
+                <!-- Карточки достижений заполняются динамически -->
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1559,12 +1747,12 @@
             <div class="settings-tab-container">
               <!-- Общие настройки -->
               <div id="settings-tab-general" class="settings-tab-content active">
-                <!-- Карточка Валюты -->
+                <!-- Карточка Общих Настроек -->
                 <div class="dashboard-card" style="width: 100%;">
-                  <h3 style="margin-bottom: 16px;">Валюта приложения</h3>
-                  <form id="settings-currency-form" class="settings-form">
+                  <h3 style="margin-bottom: 16px;">Общие настройки</h3>
+                  <form id="settings-general-form" class="settings-form">
                     <div class="input-group">
-                      <label for="settings-currency">Выберите валюту</label>
+                      <label for="settings-currency">Валюта приложения</label>
                       <select id="settings-currency" required>
                         <option value="RUB">Rub (₽) — Рубль</option>
                         <option value="USD">Usd ($) — Доллар</option>
@@ -1575,8 +1763,22 @@
                         <option value="UAH">Uah (₴) — Гривна</option>
                       </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                      <span>Применить валюту</span>
+
+                    <div class="input-group" style="margin-top: 16px;">
+                      <label for="settings-fin-month-start">Начало расчетного периода (день месяца)</label>
+                      <input type="number" id="settings-fin-month-start" min="1" max="31" required style="width: 100%; padding: 10px 12px; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); outline: none;">
+                      <span style="display: block; font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
+                        День месяца, с которого начинается расчет бюджетов и расходов за текущий месяц (по умолчанию 1).
+                      </span>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 16px; display: flex; align-items: center; gap: 8px;">
+                      <input type="checkbox" id="settings-round-amounts" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color);">
+                      <label for="settings-round-amounts" style="margin: 0; cursor: pointer; user-select: none;">Округлять копейки (скрывать копейки во всем интерфейсе)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: 20px;">
+                      <span>Сохранить настройки</span>
                     </button>
                   </form>
                 </div>
@@ -1726,9 +1928,9 @@
         </div>
         <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
           <p id="confirm-modal-message" style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; white-space: pre-wrap;"></p>
-          <div class="modal-footer" style="margin-top: 0;">
-            <button type="button" id="btn-confirm-cancel" class="btn btn-secondary">Отмена</button>
-            <button type="button" id="btn-confirm-ok" class="btn btn-primary">Подтвердить</button>
+          <div class="modal-footer" style="margin-top: 0; width: 100%;">
+            <button type="button" id="btn-confirm-cancel" class="btn btn-secondary" style="display: none;">Отмена</button>
+            <button type="button" id="btn-confirm-ok" class="btn btn-primary" style="width: 100%;">Подтвердить</button>
           </div>
         </div>
       </div>
@@ -1801,6 +2003,102 @@
             <button type="submit" id="btn-add-task-submit" class="btn btn-primary">Добавить</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Кастомное модальное окно для редактирования профиля -->
+    <div id="edit-profile-modal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3>Редактировать профиль</h3>
+          <div class="modal-close" id="close-edit-profile-modal">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+        </div>
+        <form id="edit-profile-modal-form" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label for="modal-profile-username">Имя пользователя</label>
+            <input type="text" id="modal-profile-username" required placeholder="Введите имя..." autocomplete="off">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label for="modal-profile-password">Новый пароль</label>
+            <div class="password-wrapper">
+              <input type="password" id="modal-profile-password" placeholder="Оставьте пустым, чтобы не менять..." autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" id="toggle-modal-profile-password">
+                <span class="material-symbols-outlined">visibility</span>
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <div class="input-group" style="flex: 1; margin-bottom: 0;">
+              <label for="modal-roundup-mode">Автоокругление трат</label>
+              <select id="modal-roundup-mode">
+                <option value="none">Отключено</option>
+                <option value="10">До 10 ₽</option>
+                <option value="50">До 50 ₽</option>
+                <option value="100">До 100 ₽</option>
+              </select>
+            </div>
+            <div class="input-group" style="flex: 1; margin-bottom: 0;">
+              <label for="modal-roundup-goal">Цель копилки</label>
+              <select id="modal-roundup-goal">
+                <option value="">Не выбрано</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="btn-edit-profile-cancel" class="btn btn-secondary">Отмена</button>
+            <button type="submit" id="btn-edit-profile-submit" class="btn btn-primary">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Кастомное модальное окно сбора урожая -->
+    <div id="harvest-modal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 450px;">
+        <div class="modal-header">
+          <h3>Ваш урожай за текущий месяц</h3>
+          <div class="modal-close" id="close-harvest-modal">
+            <span class="material-symbols-outlined">close</span>
+          </div>
+        </div>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+          <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin: 0; text-align: center;">
+            Посмотрим, какие плоды принесли ваши старания в этом финансовом месяце!
+          </p>
+          
+          <div class="harvest-crop-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+            <!-- Сбережения -->
+            <div class="crop-item" style="background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <span class="crop-icon" style="font-size: 28px;">🍎</span>
+              <span style="font-size: 11px; color: var(--text-secondary);">Сбережения</span>
+              <strong id="harvest-savings-val" style="font-size: 13px; color: var(--color-savings);">0.00 ₽</strong>
+            </div>
+
+            <!-- Задачи -->
+            <div class="crop-item" style="background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <span class="crop-icon" style="font-size: 28px;">🌸</span>
+              <span style="font-size: 11px; color: var(--text-secondary);">Задачи</span>
+              <strong id="harvest-tasks-val" style="font-size: 13px; color: var(--accent-color);">0 шт.</strong>
+            </div>
+
+            <!-- Бюджеты -->
+            <div class="crop-item" style="background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <span class="crop-icon" style="font-size: 28px;">💧</span>
+              <span style="font-size: 11px; color: var(--text-secondary);">Бюджеты</span>
+              <strong id="harvest-budgets-val" style="font-size: 13px; color: var(--color-success);">0 превышено</strong>
+            </div>
+          </div>
+
+          <div id="harvest-verdict-box" style="background-color: var(--bg-input); border-radius: 6px; padding: 12px; border: 1px solid var(--border-color); font-size: 12px; line-height: 1.5; color: var(--text-primary); text-align: center;">
+            Загрузка вердикта...
+          </div>
+
+          <div class="modal-footer" style="margin-top: 0; width: 100%;">
+            <button type="button" id="btn-harvest-ok" class="btn btn-primary" style="width: 100%;">Отлично</button>
+          </div>
+        </div>
       </div>
     </div>
 

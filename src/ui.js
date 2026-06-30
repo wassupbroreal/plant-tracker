@@ -20,6 +20,49 @@ export const ui = {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   },
 
+  getFinancialMonthRange(date = new Date(), startDay = 1) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+
+    let startYear, startMonth;
+    if (day >= startDay) {
+      startYear = year;
+      startMonth = month;
+    } else {
+      const prevDate = new Date(year, month - 1, 1);
+      startYear = prevDate.getFullYear();
+      startMonth = prevDate.getMonth();
+    }
+
+    const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate();
+    const actualStartDay = Math.min(startDay, daysInStartMonth);
+    const startDate = new Date(startYear, startMonth, actualStartDay, 0, 0, 0, 0);
+
+    let nextYear = startYear;
+    let nextMonth = startMonth + 1;
+    const nextDate = new Date(nextYear, nextMonth, 1);
+    nextYear = nextDate.getFullYear();
+    nextMonth = nextDate.getMonth();
+
+    const daysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
+    const actualNextStartDay = Math.min(startDay, daysInNextMonth);
+    
+    const nextStartDate = new Date(nextYear, nextMonth, actualNextStartDay, 0, 0, 0, 0);
+    const endDate = new Date(nextStartDate.getTime() - 1);
+
+    return { startDate, endDate };
+  },
+
+  isDateInCurrentFinancialMonth(dateInput, startDay = 1) {
+    if (!dateInput) return false;
+    const tDate = new Date(dateInput);
+    tDate.setHours(0, 0, 0, 0);
+    
+    const { startDate, endDate } = this.getFinancialMonthRange(new Date(), startDay);
+    return tDate >= startDate && tDate <= endDate;
+  },
+
   animateEditorFade(element) {
     if (!element) return;
     element.classList.remove('screen-fade-in', 'screen-fade-out');
@@ -58,6 +101,8 @@ export const ui = {
     this.loginPasswordInput = document.getElementById('login-password');
     this.registerUsernameInput = document.getElementById('register-username');
     this.registerPasswordInput = document.getElementById('register-password');
+    this.toggleLoginPasswordBtn = document.getElementById('toggle-login-password');
+    this.toggleRegisterPasswordBtn = document.getElementById('toggle-register-password');
     this.loginErrorMsg = document.getElementById('login-error-msg');
     this.registerErrorMsg = document.getElementById('register-error-msg');
     this.switchToRegisterBtn = document.getElementById('switch-to-register-btn');
@@ -132,6 +177,15 @@ export const ui = {
     this.filterDateEnd = document.getElementById('filter-date-end');
     this.resetFiltersBtn = document.getElementById('reset-filters-btn');
 
+    // Фильтры Планирования DOM
+    this.planSearch = document.getElementById('planning-search');
+    this.planFilterType = document.getElementById('planning-filter-type');
+    this.planFilterCategory = document.getElementById('planning-filter-category');
+    this.planFilterTag = document.getElementById('planning-filter-tag');
+    this.planFilterDateStart = document.getElementById('planning-filter-date-start');
+    this.planFilterDateEnd = document.getElementById('planning-filter-date-end');
+    this.planResetFiltersBtn = document.getElementById('planning-reset-filters-btn');
+
     // Фильтры Бюджетов DOM
     this.budgetSearch = document.getElementById('budget-search');
     this.budgetResetBtn = document.getElementById('budget-reset-filters-btn');
@@ -150,6 +204,8 @@ export const ui = {
     this.overviewBtnToGoals = document.getElementById('overview-btn-to-goals');
     this.overviewBtnToTasks = document.getElementById('overview-btn-to-tasks');
     this.overviewBtnToPlanning = document.getElementById('overview-btn-to-planning');
+    this.overviewBtnEditProfile = document.getElementById('overview-btn-edit-profile');
+    this.overviewProfileUsername = document.getElementById('overview-profile-username');
 
     // Элементы Аналитики DOM
     this.analyticsPeriod = document.getElementById('analytics-period');
@@ -171,7 +227,9 @@ export const ui = {
     this.settingsExportBtn = document.getElementById('settings-export-btn');
     this.settingsImportFile = document.getElementById('settings-import-file');
     this.settingsResetBtn = document.getElementById('settings-reset-btn');
-    this.settingsCurrencyForm = document.getElementById('settings-currency-form');
+    this.settingsGeneralForm = document.getElementById('settings-general-form');
+    this.settingsFinMonthStart = document.getElementById('settings-fin-month-start');
+    this.settingsRoundAmounts = document.getElementById('settings-round-amounts');
 
     // Профиль DOM
     this.profileEditForm = document.getElementById('profile-edit-form');
@@ -203,6 +261,31 @@ export const ui = {
     this.modalNoteTitle = document.getElementById('modal-note-title');
     this.btnAddNoteCancel = document.getElementById('btn-add-note-cancel');
     this.btnAddNoteSubmit = document.getElementById('btn-add-note-submit');
+
+    // Модальное окно редактирования профиля
+    this.editProfileModal = document.getElementById('edit-profile-modal');
+    this.closeEditProfileModal = document.getElementById('close-edit-profile-modal');
+    this.editProfileModalForm = document.getElementById('edit-profile-modal-form');
+    this.modalProfileUsername = document.getElementById('modal-profile-username');
+    this.modalProfilePassword = document.getElementById('modal-profile-password');
+    this.toggleModalProfilePassword = document.getElementById('toggle-modal-profile-password');
+    this.btnEditProfileCancel = document.getElementById('btn-edit-profile-cancel');
+    this.btnEditProfileSubmit = document.getElementById('btn-edit-profile-submit');
+    this.modalRoundUpMode = document.getElementById('modal-roundup-mode');
+    this.modalRoundUpGoal = document.getElementById('modal-roundup-goal');
+
+    // Модальное окно сбора урожая
+    this.harvestModal = document.getElementById('harvest-modal');
+    this.closeHarvestModal = document.getElementById('close-harvest-modal');
+    this.btnHarvestOk = document.getElementById('btn-harvest-ok');
+
+    // Элементы Обзора и Копилки
+    this.overviewBtnHarvest = document.getElementById('overview-btn-harvest');
+    this.overviewPlantSvgContainer = document.getElementById('overview-plant-svg-container');
+    this.overviewGardenerAdvice = document.getElementById('overview-gardener-advice');
+    this.overviewBloomCalendar = document.getElementById('overview-bloom-calendar');
+    this.settingsRoundUpMode = document.getElementById('settings-roundup-mode');
+    this.settingsRoundUpGoal = document.getElementById('settings-roundup-goal');
 
     // Модальное окно чек-листов
     this.addChecklistModal = document.getElementById('add-checklist-modal');
@@ -274,6 +357,7 @@ export const ui = {
     
     this.bindEvents();
     this.initCustomSelects();
+    this.initCustomCalendars();
     this.initHeaderRain();
     this.initAlertOverride();
     this.initGlobalValidationHandler();
@@ -688,6 +772,8 @@ export const ui = {
 
     if (this.settingsUsername) this.settingsUsername.value = user.username;
     if (this.settingsCurrency) this.settingsCurrency.value = user.currency || 'RUB';
+    if (this.settingsFinMonthStart) this.settingsFinMonthStart.value = user.financialMonthStart || 1;
+    if (this.settingsRoundAmounts) this.settingsRoundAmounts.checked = !!user.roundAmounts;
     if (this.profileUsername) this.profileUsername.value = user.username;
 
     // Отрисовать данные
@@ -907,6 +993,132 @@ export const ui = {
     }, 3000);
   },
 
+  checkAchievement(id, value, mode = 'set') {
+    const unlocked = db.updateAchievementProgress(id, value, mode);
+    if (unlocked) {
+      this.showAchievementUnlockToast(unlocked);
+      
+      const activeScreen = document.querySelector('.screen.active');
+      if (activeScreen && activeScreen.id === 'profile-screen') {
+        this.renderProfile();
+      }
+    }
+  },
+
+  checkFinanceAchievements() {
+    const txs = db.getTransactions();
+    
+    // 1. Первый росток (первая транзакция)
+    if (txs.length >= 1) {
+      this.checkAchievement('first_tx', 1);
+    }
+    
+    // 2. Скрупулезность (10 транзакций)
+    this.checkAchievement('tx_count_10', txs.length);
+    
+    // 3. Копилка (отложено суммарно 10000)
+    const totalSavings = txs.filter(t => t.type === 'savings').reduce((sum, t) => sum + t.amount, 0);
+    this.checkAchievement('savings_10k', totalSavings);
+    
+    // 4. Богатый урожай (общий доход > 100 000)
+    const totalIncome = txs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    this.checkAchievement('rich_harvest', totalIncome);
+
+    // 5. Экономия (потрачено < 50% дохода за расчетный период)
+    const user = db.getProfile();
+    if (user) {
+      const startDay = user.financialMonthStart || 1;
+      const periodTxs = txs.filter(t => this.isDateInCurrentFinancialMonth(t.date, startDay));
+      const periodExpenses = periodTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+      const periodIncome = periodTxs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+      
+      if (periodIncome >= 1000 && periodExpenses > 0 && periodExpenses < (periodIncome * 0.5)) {
+        this.checkAchievement('frugal_month', 1);
+      }
+    }
+
+    // 6. Архитектор бюджетов (создано лимитов)
+    const budgets = db.getBudgets();
+    if (budgets.length >= 1) {
+      this.checkAchievement('first_budget', 1);
+    }
+  },
+
+  checkSavingsGoalsAchievements() {
+    const goals = db.getGoals();
+    if (goals.length >= 1) {
+      this.checkAchievement('first_goal', 1);
+    }
+  },
+
+  checkPlanningAchievements() {
+    const plans = db.getPlans();
+    if (plans.length >= 1) {
+      this.checkAchievement('first_plan', 1);
+    }
+  },
+
+  showAchievementUnlockToast(ach) {
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    const icon = ach.icon || 'star';
+    
+    toast.innerHTML = `
+      <div class="achievement-toast-icon-box">
+        <span class="material-symbols-outlined">${icon}</span>
+      </div>
+      <div class="achievement-toast-content">
+        <div class="achievement-toast-label">Достижение получено!</div>
+        <div class="achievement-toast-title">${ach.title}</div>
+        <div class="achievement-toast-desc">${ach.desc}</div>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    this.createConfettiAround(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.addEventListener('transitionend', () => {
+        toast.remove();
+      });
+    }, 5000);
+  },
+
+  createConfettiAround(element) {
+    const emojis = ['🎉', '✨', '⭐', '🌱', '🏆', '💰'];
+    const xCenter = window.innerWidth - 180;
+    const yCenter = window.innerHeight - 50;
+
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'achievement-confetti-particle';
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 100;
+      const targetX = Math.cos(angle) * distance;
+      const targetY = Math.sin(angle) * distance - 80;
+      
+      p.style.setProperty('--x', `${targetX}px`);
+      p.style.setProperty('--y', `${targetY}px`);
+      p.style.setProperty('--r', `${Math.random() * 360}deg`);
+      
+      p.style.left = `${xCenter}px`;
+      p.style.top = `${yCenter}px`;
+      
+      document.body.appendChild(p);
+      
+      setTimeout(() => {
+        p.remove();
+      }, 1200);
+    }
+  },
+
   showConfirm(message) {
     return new Promise((resolve) => {
       const modal = document.getElementById('confirm-modal');
@@ -1030,6 +1242,9 @@ export const ui = {
         document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
           if (w !== wrapper) w.classList.remove('open');
         });
+        document.querySelectorAll('.custom-date-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
         wrapper.classList.toggle('open');
       });
 
@@ -1040,8 +1255,239 @@ export const ui = {
     });
 
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.custom-select-wrapper')) {
+      if (!e.target.closest('.custom-select-wrapper') && !e.target.closest('.custom-date-wrapper')) {
         document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+        document.querySelectorAll('.custom-date-wrapper.open').forEach(w => {
+          w.classList.remove('open');
+        });
+      }
+    });
+  },
+
+  initCustomCalendars() {
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    
+    // Russian months translations
+    const monthNames = [
+      'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+      'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+
+    dateInputs.forEach(input => {
+      if (input.parentElement.classList.contains('custom-date-wrapper')) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'custom-date-wrapper';
+      if (input.id) wrapper.classList.add(`wrapper-${input.id}`);
+
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+      input.style.display = 'none';
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'custom-date-trigger';
+
+      const updateTriggerText = () => {
+        if (input.value) {
+          const parts = input.value.split('-');
+          if (parts.length === 3) {
+            trigger.textContent = `${parts[2]}.${parts[1]}.${parts[0]}`;
+            return;
+          }
+        }
+        trigger.textContent = input.getAttribute('placeholder') || '···';
+      };
+      updateTriggerText();
+      wrapper.appendChild(trigger);
+
+      const dropdown = document.createElement('div');
+      dropdown.className = 'custom-date-dropdown';
+      wrapper.appendChild(dropdown);
+
+      // Track active month/year viewed in the calendar
+      let activeMonth = new Date().getMonth();
+      let activeYear = new Date().getFullYear();
+
+      // Set active month/year from input value on open
+      const resetActiveView = () => {
+        if (input.value) {
+          const d = new Date(input.value);
+          if (!isNaN(d.getTime())) {
+            activeMonth = d.getMonth();
+            activeYear = d.getFullYear();
+          }
+        } else {
+          const d = new Date();
+          activeMonth = d.getMonth();
+          activeYear = d.getFullYear();
+        }
+      };
+
+      const renderCalendarGrid = () => {
+        dropdown.innerHTML = '';
+
+        // Calendar Header
+        const header = document.createElement('div');
+        header.className = 'calendar-header';
+
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'cal-nav-btn prev-btn';
+        prevBtn.innerHTML = '<span class="material-symbols-outlined">chevron_left</span>';
+        prevBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          activeMonth--;
+          if (activeMonth < 0) {
+            activeMonth = 11;
+            activeYear--;
+          }
+          renderCalendarGrid();
+        });
+
+        const title = document.createElement('span');
+        title.className = 'cal-month-year';
+        title.textContent = `${monthNames[activeMonth]} ${activeYear}`;
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'cal-nav-btn next-btn';
+        nextBtn.innerHTML = '<span class="material-symbols-outlined">chevron_right</span>';
+        nextBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          activeMonth++;
+          if (activeMonth > 11) {
+            activeMonth = 0;
+            activeYear++;
+          }
+          renderCalendarGrid();
+        });
+
+        header.appendChild(prevBtn);
+        header.appendChild(title);
+        header.appendChild(nextBtn);
+        dropdown.appendChild(header);
+
+        // Weekdays Row
+        const weekdays = document.createElement('div');
+        weekdays.className = 'calendar-weekdays';
+        const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        dayLabels.forEach(lbl => {
+          const s = document.createElement('span');
+          s.textContent = lbl;
+          weekdays.appendChild(s);
+        });
+        dropdown.appendChild(weekdays);
+
+        // Days Grid
+        const daysContainer = document.createElement('div');
+        daysContainer.className = 'calendar-days';
+
+        // Get starting day of the month and number of days
+        let startDay = new Date(activeYear, activeMonth, 1).getDay();
+        if (startDay === 0) startDay = 7; // Convert Sun=0 to Sun=7
+        const totalDays = new Date(activeYear, activeMonth + 1, 0).getDate();
+
+        // Previous month days to fill empty space
+        for (let i = 1; i < startDay; i++) {
+          const cell = document.createElement('span');
+          cell.className = 'calendar-day empty';
+          daysContainer.appendChild(cell);
+        }
+
+        // Current month days
+        const today = new Date();
+        const selectedDateStr = input.value; // YYYY-MM-DD
+
+        for (let day = 1; day <= totalDays; day++) {
+          const cell = document.createElement('span');
+          cell.className = 'calendar-day';
+          cell.textContent = day;
+
+          const cellDateStr = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          
+          if (cellDateStr === selectedDateStr) {
+            cell.classList.add('selected');
+          }
+
+          if (day === today.getDate() && activeMonth === today.getMonth() && activeYear === today.getFullYear()) {
+            cell.classList.add('today');
+          }
+
+          cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            input.value = cellDateStr;
+            
+            // Dispatch change event to trigger lists updates
+            const changeEvent = new Event('change', { bubbles: true });
+            input.dispatchEvent(changeEvent);
+
+            const inputEvent = new Event('input', { bubbles: true });
+            input.dispatchEvent(inputEvent);
+
+            wrapper.classList.remove('open');
+          });
+
+          daysContainer.appendChild(cell);
+        }
+
+        dropdown.appendChild(daysContainer);
+
+        // Reset/Clear button (only for non-required fields)
+        if (!input.required) {
+          const footer = document.createElement('div');
+          footer.className = 'calendar-footer';
+          
+          const clearBtn = document.createElement('button');
+          clearBtn.type = 'button';
+          clearBtn.className = 'cal-clear-btn';
+          clearBtn.textContent = 'Сбросить';
+          clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            input.value = '';
+
+            const changeEvent = new Event('change', { bubbles: true });
+            input.dispatchEvent(changeEvent);
+
+            const inputEvent = new Event('input', { bubbles: true });
+            input.dispatchEvent(inputEvent);
+
+            wrapper.classList.remove('open');
+          });
+          footer.appendChild(clearBtn);
+          dropdown.appendChild(footer);
+        }
+      };
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Close other custom selects and date pickers
+        document.querySelectorAll('.custom-select-wrapper.open').forEach(w => w.classList.remove('open'));
+        document.querySelectorAll('.custom-date-wrapper.open').forEach(w => {
+          if (w !== wrapper) w.classList.remove('open');
+        });
+
+        const willOpen = !wrapper.classList.contains('open');
+        if (willOpen) {
+          resetActiveView();
+          renderCalendarGrid();
+        }
+        wrapper.classList.toggle('open');
+      });
+
+      // Listen for manual value changes to sync trigger text
+      input.addEventListener('change', () => {
+        updateTriggerText();
+      });
+    });
+
+    // Close on clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-date-wrapper')) {
+        document.querySelectorAll('.custom-date-wrapper.open').forEach(w => {
           w.classList.remove('open');
         });
       }

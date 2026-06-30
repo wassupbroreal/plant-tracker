@@ -241,7 +241,44 @@ export const financeMethods = {
         if (this.filterTag) this.filterTag.value = 'all';
         if (this.filterDateStart) this.filterDateStart.value = '';
         if (this.filterDateEnd) this.filterDateEnd.value = '';
+        
+        const changeEvt = new Event('change', { bubbles: true });
+        if (this.filterType) this.filterType.dispatchEvent(changeEvt);
+        if (this.filterCategory) this.filterCategory.dispatchEvent(changeEvt);
+        if (this.filterTag) this.filterTag.dispatchEvent(changeEvt);
+        if (this.filterDateStart) this.filterDateStart.dispatchEvent(changeEvt);
+        if (this.filterDateEnd) this.filterDateEnd.dispatchEvent(changeEvt);
+
         this.renderTransactions();
+      });
+    }
+
+    // --- ФИЛЬТРЫ ПЛАНИРОВАНИЯ ---
+    const planFilterElements = [this.planSearch, this.planFilterType, this.planFilterCategory, this.planFilterTag, this.planFilterDateStart, this.planFilterDateEnd];
+    planFilterElements.forEach(element => {
+      if (element) {
+        element.addEventListener('input', () => this.renderPlanning());
+        element.addEventListener('change', () => this.renderPlanning());
+      }
+    });
+
+    if (this.planResetFiltersBtn) {
+      this.planResetFiltersBtn.addEventListener('click', () => {
+        if (this.planSearch) this.planSearch.value = '';
+        if (this.planFilterType) this.planFilterType.value = 'all';
+        if (this.planFilterCategory) this.planFilterCategory.value = 'all';
+        if (this.planFilterTag) this.planFilterTag.value = 'all';
+        if (this.planFilterDateStart) this.planFilterDateStart.value = '';
+        if (this.planFilterDateEnd) this.planFilterDateEnd.value = '';
+
+        const changeEvt = new Event('change', { bubbles: true });
+        if (this.planFilterType) this.planFilterType.dispatchEvent(changeEvt);
+        if (this.planFilterCategory) this.planFilterCategory.dispatchEvent(changeEvt);
+        if (this.planFilterTag) this.planFilterTag.dispatchEvent(changeEvt);
+        if (this.planFilterDateStart) this.planFilterDateStart.dispatchEvent(changeEvt);
+        if (this.planFilterDateEnd) this.planFilterDateEnd.dispatchEvent(changeEvt);
+
+        this.renderPlanning();
       });
     }
 
@@ -564,11 +601,35 @@ export const financeMethods = {
     const plans = db.getPlans().filter(p => p.status !== 'paid');
     const categories = db.getCategories();
     const tags = db.getTags();
+    
+    // Проверка планировочных достижений
+    this.checkPlanningAchievements();
+    
     if (!this.planningList) return;
     this.planningList.innerHTML = '';
 
+    const searchVal = this.planSearch ? this.planSearch.value.trim().toLowerCase() : '';
+    const typeVal = this.planFilterType ? this.planFilterType.value : 'all';
+    const catVal = this.planFilterCategory ? this.planFilterCategory.value : 'all';
+    const tagVal = this.planFilterTag ? this.planFilterTag.value : 'all';
+    const dateStartVal = this.planFilterDateStart ? this.planFilterDateStart.value : '';
+    const dateEndVal = this.planFilterDateEnd ? this.planFilterDateEnd.value : '';
+
+    const filtered = plans.filter(p => {
+      if (searchVal && !p.description.toLowerCase().includes(searchVal)) return false;
+      if (typeVal !== 'all' && p.type !== typeVal) return false;
+      if (catVal !== 'all' && p.categoryId !== catVal) return false;
+      if (tagVal !== 'all') {
+        const planTagsList = p.tagIds || (p.tagId ? [p.tagId] : []);
+        if (!planTagsList.includes(tagVal)) return false;
+      }
+      if (dateStartVal && p.date < dateStartVal) return false;
+      if (dateEndVal && p.date > dateEndVal) return false;
+      return true;
+    });
+
     const groups = {};
-    plans.forEach(plan => {
+    filtered.forEach(plan => {
       if (!groups[plan.date]) {
         groups[plan.date] = [];
       }
@@ -586,8 +647,7 @@ export const financeMethods = {
       sortedDates.forEach(dateStr => {
         const datePlans = groups[dateStr];
         const card = document.createElement('div');
-        card.className = 'budget-card';
-        card.style.gap = '12px';
+        card.className = 'budget-card planning-date-card';
 
         let rowsHtml = '';
         datePlans.forEach((plan, index) => {
@@ -608,42 +668,62 @@ export const financeMethods = {
           else if (plan.type === 'expense') amountSign = '−';
 
           const formattedDate = plan.date.split('-').reverse().join('.');
-          const isLastRow = index === datePlans.length - 1;
-          const borderStyle = isLastRow ? '' : 'border-bottom: 1px solid var(--border-color); padding-bottom: 12px;';
-          const marginTopStyle = index === 0 ? '' : 'margin-top: 4px;';
+          const cat = categories.find(c => c.id === plan.categoryId);
 
           const planTagsList = plan.tagIds || (plan.tagId ? [plan.tagId] : []);
           const planTags = planTagsList.map(id => tags.find(tg => tg.id === id)).filter(Boolean);
-          const tagsBadgesHtml = planTags.map(tag => `
-            <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35; font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 4px;">
-              <span class="material-symbols-outlined" style="font-size: 10px;">label</span>${this.formatSentenceCase(tag.name)}
-            </span>
-          `).join('');
+          const tagsContainerHtml = planTags.length > 0 ? `
+            <div class="tx-card-tags-block">
+              ${planTags.map(tag => `
+                <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35;">
+                  <span class="material-symbols-outlined">label</span>${this.formatSentenceCase(tag.name)}
+                </span>
+              `).join('')}
+            </div>
+          ` : '';
 
           const statusBadgeHtml = statusLabel !== 'Ожидает' ? `
-            <span class="status-badge ${statusClass}" style="font-size: 11px; padding: 2px 6px; flex-shrink: 0; margin-left: 4px;">${this.formatSentenceCase(statusLabel)}</span>
+            <span class="status-badge ${statusClass}">${this.formatSentenceCase(statusLabel)}</span>
           ` : '';
 
           rowsHtml += `
-            <div class="planning-row-item" data-id="${plan.id}" style="display: flex; justify-content: space-between; align-items: center; ${borderStyle} ${marginTopStyle}">
-              <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; margin-right: 16px;">
-                <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-main); flex-shrink: 0;">${formattedDate}</span>
-                <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin-right: 4px;">
-                  ${this.formatSentenceCase(this.escapeHtml(plan.description))}
-                </span>
-                ${tagsBadgesHtml}
-                ${statusBadgeHtml}
+            <div class="planning-row-item" data-id="${plan.id}">
+              <div class="tx-card-main-content">
+                <div class="tx-card-row">
+                  <!-- Category Block -->
+                  <div class="tx-card-col tx-card-category" style="color: ${cat ? cat.color : 'var(--text-muted)'};">
+                    <span class="material-symbols-outlined" style="font-size: 18px; flex-shrink: 0;">${cat ? cat.icon : 'help_outline'}</span>
+                    <span style="font-weight: 500; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${cat ? this.formatSentenceCase(cat.name) : 'Без категории'}</span>
+                  </div>
+
+                  <!-- Description Block (with status badge) -->
+                  <div class="tx-card-col tx-card-desc">
+                    <span style="font-weight: 500; font-size: 13px; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                      ${this.formatSentenceCase(this.escapeHtml(plan.description))}
+                    </span>
+                    ${statusBadgeHtml}
+                  </div>
+
+                  <!-- Date Block -->
+                  <div class="tx-card-col tx-card-date">
+                    <span>${formattedDate}</span>
+                  </div>
+
+                  <!-- Amount Block -->
+                  <div class="tx-card-col tx-card-amount">
+                    <span class="tx-amount ${typeClass}">${this.formatAmount(plan.amount, false, amountSign)}</span>
+                  </div>
+                </div>
+                ${tagsContainerHtml}
               </div>
-              
-              <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
-                <span class="tx-amount ${typeClass}" style="font-size: 14px; font-weight: 500;">
-                  ${this.formatAmount(plan.amount, false, amountSign)}
-                </span>
+
+              <!-- Action Menu Block -->
+              <div class="tx-card-actions">
                 <div class="category-menu-wrapper">
                   <button class="category-action-btn menu-trigger" type="button">
                     <span class="material-symbols-outlined">more_vert</span>
                   </button>
-                  <div class="category-context-menu">
+                  <div class="category-context-menu" style="top: 100%; right: 0;">
                     ${plan.status !== 'paid' ? `
                       <div class="custom-option pay-opt" style="color: var(--color-success);">
                         <span class="material-symbols-outlined">check</span>
@@ -905,6 +985,18 @@ export const financeMethods = {
       });
       this.filterCategory.value = currentValue;
     }
+    if (this.planFilterCategory) {
+      const currentValue = this.planFilterCategory.value;
+      this.planFilterCategory.innerHTML = '<option value="all">Все категории</option>';
+      categories.forEach(cat => {
+        const typeLabel = cat.type === 'income' ? 'Доход' : cat.type === 'expense' ? 'Расход' : 'Накопление';
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = `${this.formatSentenceCase(cat.name)} (${this.formatSentenceCase(typeLabel)})`;
+        this.planFilterCategory.appendChild(opt);
+      });
+      this.planFilterCategory.value = currentValue;
+    }
   },
 
   // --- ЛОГИКА ТРАНЗАКЦИЙ ---
@@ -1027,7 +1119,7 @@ export const financeMethods = {
         const txTagsList = t.tagIds || (t.tagId ? [t.tagId] : []);
         const txTags = txTagsList.map(id => tags.find(tg => tg.id === id)).filter(Boolean);
         const card = document.createElement('div');
-        card.className = 'budget-card';
+        card.className = 'budget-card tx-card';
         
         let typeClass = '';
         let amountSign = '';
@@ -1039,28 +1131,55 @@ export const financeMethods = {
           amountSign = '−';
         } else {
           typeClass = 'savings';
-          amountSign = '';
+          amountSign = t.amount < 0 ? '−' : '';
         }
 
-        const tagsBadgesHtml = txTags.map(tag => `
-          <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">
-            <span class="material-symbols-outlined" style="font-size: 10px;">label</span>${this.formatSentenceCase(tag.name)}
-          </span>
-        `).join('');
+        const tagsContainerHtml = txTags.length > 0 ? `
+          <div class="tx-card-tags-block">
+            ${txTags.map(tag => `
+              <span class="tag-badge" style="background-color: ${tag.color}15; color: ${tag.color}; border: 1px solid ${tag.color}35;">
+                <span class="material-symbols-outlined">label</span>${this.formatSentenceCase(tag.name)}
+              </span>
+            `).join('')}
+          </div>
+        ` : '';
 
         card.innerHTML = `
-          <div class="budget-card-header">
-            <div class="budget-card-title" style="color: ${cat ? cat.color : 'var(--text-muted)'}; flex-wrap: wrap;">
-              <span class="material-symbols-outlined">${cat ? cat.icon : 'help_outline'}</span>
-              <span>${cat ? this.formatSentenceCase(cat.name) : 'Без категории'}</span>
-              ${tagsBadgesHtml}
-              <span style="font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 8px;">${t.date.split('-').reverse().join('.')}</span>
+          <div class="tx-card-main-content">
+            <div class="tx-card-row">
+              <!-- Category Block -->
+              <div class="tx-card-col tx-card-category" style="color: ${cat ? cat.color : 'var(--text-muted)'};">
+                <span class="material-symbols-outlined" style="font-size: 18px; flex-shrink: 0;">${cat ? cat.icon : 'help_outline'}</span>
+                <span style="font-weight: 500; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${cat ? this.formatSentenceCase(cat.name) : 'Без категории'}</span>
+              </div>
+
+              <!-- Description Block -->
+              <div class="tx-card-col tx-card-desc">
+                <span style="font-size: 13px; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                  ${this.formatSentenceCase(this.escapeHtml(t.description)) || '—'}
+                </span>
+              </div>
+
+              <!-- Date Block -->
+              <div class="tx-card-col tx-card-date">
+                <span>${t.date.split('-').reverse().join('.')}</span>
+              </div>
+
+              <!-- Amount Block -->
+              <div class="tx-card-col tx-card-amount">
+                <span class="tx-amount ${typeClass}">${this.formatAmount(t.amount, false, amountSign)}</span>
+              </div>
             </div>
+            ${tagsContainerHtml}
+          </div>
+
+          <!-- Action Menu Block -->
+          <div class="tx-card-actions">
             <div class="category-menu-wrapper">
               <button class="category-action-btn menu-trigger" type="button">
                 <span class="material-symbols-outlined">more_vert</span>
               </button>
-              <div class="category-context-menu">
+              <div class="category-context-menu" style="top: 100%; right: 0;">
                 <div class="custom-option edit-opt">
                   <span class="material-symbols-outlined">edit</span>
                   <span>Редактировать</span>
@@ -1070,14 +1189,6 @@ export const financeMethods = {
                   <span>Удалить</span>
                 </div>
               </div>
-            </div>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-            <div style="color: var(--text-secondary); font-size: 13px;">
-              ${this.formatSentenceCase(this.escapeHtml(t.description))}
-            </div>
-            <div class="tx-amount ${typeClass}" style="font-size: 14px;">
-              ${this.formatAmount(t.amount, false, amountSign)}
             </div>
           </div>
         `;
@@ -1138,7 +1249,7 @@ export const financeMethods = {
 
   populateTxGoals(selectedGoalId = null) {
     if (!this.txGoal) return;
-    const goals = db.getGoals();
+    const goals = db.getGoals().filter(g => !g.completed);
     this.txGoal.innerHTML = '<option value="">Без цели</option>';
     goals.forEach(goal => {
       const opt = document.createElement('option');
@@ -1158,8 +1269,11 @@ export const financeMethods = {
 
   // --- ЛОГИКА ЦЕЛЕЙ НАКОПЛЕНИЯ ---
   renderSavingsGoals(highlightId = null) {
-    const goals = db.getGoals();
+    const goals = db.getGoals().filter(g => !g.completed);
     const transactions = db.getTransactions();
+    
+    // Проверка достижений целей
+    this.checkSavingsGoalsAchievements();
     
     if (!this.goalsListItems) return;
     this.goalsListItems.innerHTML = '';
@@ -1220,6 +1334,13 @@ export const financeMethods = {
         <div class="budget-card-bar" style="--bar-base-color: var(--accent-color); height: 6px; margin: 0; width: 100%;">
           <div class="budget-card-progress" style="width: ${percent}%;"></div>
         </div>
+        ${percent >= 100 ? `
+          <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
+            <button type="button" class="btn btn-primary btn-sm btn-complete-goal" style="padding: 4px 10px; font-size: 11px; display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>Выполнить
+            </button>
+          </div>
+        ` : ''}
       `;
 
       const wrapper = card.querySelector('.category-menu-wrapper');
@@ -1250,6 +1371,37 @@ export const financeMethods = {
           this.renderSavingsGoals();
         }
       });
+
+      const completeBtn = card.querySelector('.btn-complete-goal');
+      if (completeBtn) {
+        completeBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (await this.showConfirm(`Выполнить цель "${this.formatSentenceCase(goal.title)}" и списать накопленные ${this.formatAmount(spent)} из накоплений?`)) {
+            db.updateGoal(goal.id, { completed: true });
+            
+            db.addTransaction({
+              description: `Выполнение цели: ${goal.title}`,
+              type: 'savings',
+              categoryId: 'cat-piggy',
+              tagIds: [],
+              tagId: '',
+              amount: -spent,
+              date: new Date().toISOString().substring(0, 10),
+              goalId: goal.id
+            });
+
+            const user = db.getUser();
+            if (user && user.roundUpGoalId === goal.id) {
+              db.setUser(user.username, user.currency, user.passcode, user.avatar, user.theme, user.financialMonthStart, user.roundAmounts, user.roundUpMode, '');
+            }
+
+            this.showToast('Цель выполнена! Средства списаны.', 'success');
+            this.renderSavingsGoals();
+            this.renderOverview();
+            this.renderTransactions();
+          }
+        });
+      }
 
       this.goalsListItems.appendChild(card);
     });
@@ -1481,6 +1633,17 @@ export const financeMethods = {
         this.filterTag.appendChild(opt);
       });
       this.filterTag.value = currentValue;
+    }
+    if (this.planFilterTag) {
+      const currentValue = this.planFilterTag.value;
+      this.planFilterTag.innerHTML = '<option value="all">Все теги</option>';
+      tags.forEach(tag => {
+        const opt = document.createElement('option');
+        opt.value = tag.id;
+        opt.textContent = this.formatSentenceCase(tag.name);
+        this.planFilterTag.appendChild(opt);
+      });
+      this.planFilterTag.value = currentValue;
     }
   },
 
